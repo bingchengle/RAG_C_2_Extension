@@ -10,6 +10,24 @@ import pandas as pd
 import threading
 import concurrent.futures
 
+FINANCE_METRIC_SYNONYMS = {
+    "revenue": ["sales", "turnover", "total revenue", "net sales"],
+    "operating margin": ["operating profit margin", "operating income margin", "ebit margin"],
+    "net income": ["net profit", "profit attributable", "profit for the year"],
+    "total assets": ["assets", "asset base"],
+    "shareholders' equity": ["stockholders' equity", "total equity", "net assets", "equity attributable to owners"],
+    "eps": ["earnings per share", "diluted eps", "basic eps"],
+    "cash flow": ["operating cash flow", "cash generated from operations", "cfo"],
+}
+
+FINANCE_CURRENCY_PATTERNS = {
+    "USD": [r"\busd\b", r"\bus\$?\b", r"\$"],
+    "EUR": [r"\beur\b", r"\beuro\b", r"€"],
+    "GBP": [r"\bgbp\b", r"\bpound\b", r"£"],
+    "CNY": [r"\bcny\b", r"\brmb\b", r"\byuan\b", r"人民币", r"元"],
+    "JPY": [r"\bjpy\b", r"\byen\b", r"¥"],
+}
+
 
 class QuestionsProcessor:
     def __init__(
@@ -33,6 +51,11 @@ class QuestionsProcessor:
         embedding_provider: str = "openai",
         embedding_model: Optional[str] = None,
         reranker_type: str = "llm",
+        domain: str = "general",
+        finance_metric_expansion: bool = True,
+        finance_normalize_numeric: bool = True,
+        finance_currency_consistency_check: bool = True,
+        finance_unit_conversion: bool = True,
         enable_query_rewrite: bool = False,
         enable_similarity_check: bool = True,
         enable_multi_turn: bool = False,
@@ -60,13 +83,18 @@ class QuestionsProcessor:
         self.embedding_provider = embedding_provider
         self.embedding_model = embedding_model
         self.reranker_type = reranker_type
+        self.domain = (domain or "general").lower()
+        self.finance_metric_expansion = finance_metric_expansion
+        self.finance_normalize_numeric = finance_normalize_numeric
+        self.finance_currency_consistency_check = finance_currency_consistency_check
+        self.finance_unit_conversion = finance_unit_conversion
         self.enable_query_rewrite = enable_query_rewrite
         self.enable_similarity_check = enable_similarity_check
         self.enable_multi_turn = enable_multi_turn
         self.conversation_max_turns = max(1, conversation_max_turns)
         self.openai_processor = APIProcessor(provider=api_provider)
         #self.openai_processor 是一个封装好的 API 处理器，目的是屏蔽不同厂商（如 OpenAI、Anthropic）的 API 调用差异，让后续代码无需关心具体的 API 调用细节。
-        self.answer_generator = AnswerGeneratorOptimized()
+        self.answer_generator = AnswerGeneratorOptimized(domain=self.domain)
         self.full_context = full_context
 
         self.answer_details = []
@@ -75,6 +103,134 @@ class QuestionsProcessor:
         self._conversation_lock = threading.Lock()
         self._conversation_store: Dict[str, List[Dict[str, str]]] = {}
         #self._lock = threading.Lock() 是为了应对 parallel_requests 带来的多线程并发，防止 answer_details、detail_counter 等共享变量被多线程同时修改导致数据错乱
+
+    @staticmethod
+    def _is_na_like(value: Any) -> bool:
+        if value is None:
+            return True
+        normalized = str(value).strip().lower()
+        return normalized in {"n/a", "na", "信息不足", "insufficient information", "not available", ""}
+
+    @staticmethod
+    def _extract_numeric_value_for_comparison(value: Any) -> Optional[float]:
+        if isinstance(value, (int, float)):
+            return float(value)
+        if not isinstance(value, str):
+            return None
+        text_raw = value.strip()
+        text = text_raw.lower()
+        if not text:
+            return None
+        # Avoid extracting years/numbers from long natural language sentences.
+        numeric_like = re.fullmatch(
+            r"[$€£¥￥]?\s*[-+]?\d+(?:,\d{3})*(?:\.\d+)?\s*(?:%|billion|million|thousand|bn|mn|k)?",
+            text,
+            flags=re.IGNORECASE,
+        )
+        if not numeric_like:
+            return None
+        match = re.search(r"[-+]?\d+(?:,\d{3})*(?:\.\d+)?", text)
+        if not match:
+            return None
+        raw = match.group(0).replace(",", "")
+        try:
+            number = float(raw)
+        except ValueError:
+            return None
+
+        # Normalize common unit suffixes into comparable scalar values.
+        if "billion" in text or re.search(r"\bbn\b", text):
+            number *= 1_000_000_000.0
+        elif "million" in text or re.search(r"\bmn\b", text):
+            number *= 1_000_000.0
+        elif "thousand" in text or re.search(r"\bk\b", text):
+            number *= 1_000.0
+        return number
+
+    def _fallback_comparative_name_answer(self, question: str, individual_answers: Dict[str, dict]) -> Optional[str]:
+        scored = []
+        for company, answer in individual_answers.items():
+            numeric_value = self._extract_numeric_value_for_comparison(answer.get("final_answer"))
+            if numeric_value is None:
+                continue
+            scored.append((company, numeric_value))
+
+        if not scored:
+            return None
+
+        question_lower = question.lower()
+        prefer_min = any(token in question_lower for token in ["lower", "lowest", "smaller", "least", "minimum", "min "])
+        prefer_max = any(token in question_lower for token in ["higher", "highest", "larger", "greater", "most", "maximum", "max "])
+        if prefer_min:
+            return min(scored, key=lambda x: x[1])[0]
+        if prefer_max:
+            return max(scored, key=lambda x: x[1])[0]
+
+        # Default to maximum for "which company had ..." style comparisons.
+        return max(scored, key=lambda x: x[1])[0]
+
+    def _build_comparative_company_fallback_queries(self, original_question: str, company: str) -> List[str]:
+        """Build deterministic per-company queries for comparative retries."""
+        queries: List[str] = []
+        question = (original_question or "").strip()
+        if question:
+            queries.append(question)
+
+        metric_match = re.search(r"(?:higher|lower|highest|lowest|greater|smaller)\s+(.+?):", question, re.IGNORECASE)
+        metric = metric_match.group(1).strip() if metric_match else ""
+
+        period_match = re.search(r"(in\s+.+?)\??$", question, re.IGNORECASE)
+        period = period_match.group(1).strip() if period_match else ""
+
+        if metric:
+            candidate = f'What was the {metric} of "{company}"'
+            if period:
+                candidate = f"{candidate} {period}"
+            queries.append(candidate.rstrip(" ?") + "?")
+
+            metric_lower = metric.lower()
+            alias_terms: List[str] = []
+            for canonical, aliases in FINANCE_METRIC_SYNONYMS.items():
+                candidates = [canonical] + aliases
+                if canonical in metric_lower or any(alias in metric_lower for alias in aliases):
+                    alias_terms = candidates[:5]
+                    break
+            if metric not in alias_terms:
+                alias_terms = [metric] + alias_terms
+
+            # Add apostrophe-free variant to improve retrieval hit rate.
+            alias_terms.extend([term.replace("'", "") for term in alias_terms if "'" in term])
+
+            for alias_metric in alias_terms:
+                alias_metric = alias_metric.strip()
+                if not alias_metric:
+                    continue
+                alias_query = f'What was the {alias_metric} of "{company}"'
+                if period:
+                    alias_query = f"{alias_query} {period}"
+                queries.append(alias_query.rstrip(" ?") + "?")
+
+        unique_queries: List[str] = []
+        seen = set()
+        for item in queries:
+            key = item.strip().lower()
+            if key and key not in seen:
+                seen.add(key)
+                unique_queries.append(item)
+        return unique_queries
+
+    def _choose_better_numeric_company_answer(self, candidate: dict, current: Optional[dict]) -> dict:
+        if current is None:
+            return candidate
+        cand_na = self._is_na_like(candidate.get("final_answer"))
+        curr_na = self._is_na_like(current.get("final_answer"))
+        if curr_na and not cand_na:
+            return candidate
+        if cand_na and not curr_na:
+            return current
+        cand_refs = len(candidate.get("references", []) or [])
+        curr_refs = len(current.get("references", []) or [])
+        return candidate if cand_refs > curr_refs else current
 
     def _load_questions(self, questions_file_path: Optional[Union[str, Path]]) -> List[Dict[str, str]]:
         if questions_file_path is None:
@@ -203,6 +359,11 @@ class QuestionsProcessor:
             "Preserve entities, timeframe, units, and metric intent. "
             "Output one single rewritten query only."
         )
+        if self.domain == "finance":
+            system_prompt += (
+                " Finance mode: keep fiscal period, currency, unit scale (thousand/million), "
+                "and exact metric wording; avoid replacing a metric with a related proxy."
+            )
         user_prompt = (
             f"Company: {company_name}\n"
             f"Conversation history:\n{history_text}\n\n"
@@ -220,9 +381,114 @@ class QuestionsProcessor:
             if not isinstance(rewritten, str):
                 return question
             rewritten = rewritten.strip().strip('"').strip()
-            return rewritten or question
+            rewritten = rewritten or question
+            if self.domain == "finance" and self.finance_metric_expansion:
+                rewritten = self._expand_finance_query_with_synonyms(rewritten)
+            return rewritten
         except Exception:
             return question
+
+    def _expand_finance_query_with_synonyms(self, query: str) -> str:
+        """Append likely finance metric synonyms to improve recall."""
+        lowered = query.lower()
+        expansions = []
+        for metric, aliases in FINANCE_METRIC_SYNONYMS.items():
+            if metric in lowered or any(alias in lowered for alias in aliases):
+                expansions.extend(alias for alias in aliases if alias not in lowered)
+        if not expansions:
+            return query
+        unique_expansions = list(dict.fromkeys(expansions))[:6]
+        return f"{query} | related terms: {', '.join(unique_expansions)}"
+
+    def _normalize_finance_numeric_answer(self, answer: Any, schema: str) -> Any:
+        """Normalize numeric answers in finance mode while preserving N/A."""
+        if self.domain != "finance" or not self.finance_normalize_numeric or schema != "number":
+            return answer
+        if answer is None:
+            return answer
+        if isinstance(answer, (int, float)):
+            return answer
+        if isinstance(answer, str):
+            stripped = answer.strip()
+            if stripped.upper() == "N/A":
+                return "N/A"
+            normalized = stripped.replace(",", "")
+            is_percent = normalized.endswith("%")
+            if is_percent:
+                normalized = normalized[:-1]
+            scale = 1.0
+            lowered = normalized.lower()
+            if self.finance_unit_conversion:
+                if "billion" in lowered or " bn" in lowered or lowered.endswith("b"):
+                    scale = 1_000_000_000.0
+                elif "million" in lowered or " mn" in lowered or lowered.endswith("m"):
+                    scale = 1_000_000.0
+                elif "thousand" in lowered or " k" in lowered or lowered.endswith("k"):
+                    scale = 1_000.0
+            normalized = re.sub(r"[a-zA-Z$€£¥￥ ]+", "", normalized)
+            normalized = normalized.strip()
+            if re.fullmatch(r"-?\d+", normalized):
+                try:
+                    value = int(normalized)
+                    if scale != 1.0:
+                        value = int(value * scale)
+                    return value
+                except ValueError:
+                    return answer
+            if re.fullmatch(r"-?\d+(?:\.\d+)?", normalized):
+                try:
+                    value = float(normalized)
+                    if scale != 1.0:
+                        value = value * scale
+                    if is_percent:
+                        return value
+                    return int(value) if value.is_integer() else value
+                except ValueError:
+                    return answer
+        return answer
+
+    def _infer_question_currency(self, question: str) -> Optional[str]:
+        lowered = question.lower()
+        for currency, patterns in FINANCE_CURRENCY_PATTERNS.items():
+            for pattern in patterns:
+                if re.search(pattern, lowered, re.IGNORECASE):
+                    return currency
+        return None
+
+    def _detect_context_currencies(self, retrieval_results: List[Dict[str, Any]]) -> List[str]:
+        detected = set()
+        corpus = "\n".join(item.get("text", "")[:2000] for item in retrieval_results[:8])
+        for currency, patterns in FINANCE_CURRENCY_PATTERNS.items():
+            for pattern in patterns:
+                if re.search(pattern, corpus, re.IGNORECASE):
+                    detected.add(currency)
+                    break
+        return sorted(detected)
+
+    def _apply_finance_currency_consistency(
+        self,
+        answer: Any,
+        question: str,
+        retrieval_results: List[Dict[str, Any]],
+        schema: str
+    ) -> tuple[Any, Optional[Dict[str, Any]]]:
+        if self.domain != "finance" or not self.finance_currency_consistency_check or schema != "number":
+            return answer, None
+        question_currency = self._infer_question_currency(question)
+        context_currencies = self._detect_context_currencies(retrieval_results)
+        check = {
+            "question_currency": question_currency,
+            "context_currencies": context_currencies,
+            "currency_mismatch": False
+        }
+        if not question_currency:
+            return answer, check
+        if not context_currencies:
+            return answer, check
+        if question_currency not in context_currencies and len(context_currencies) > 0:
+            check["currency_mismatch"] = True
+            return "N/A", check
+        return answer, check
 
     def _calculate_answer_similarity(self, answer_text: str, retrieval_results: List[Dict[str, Any]]) -> Optional[Dict[str, float]]:
         if not self.enable_similarity_check or not answer_text or not retrieval_results:
@@ -266,7 +532,8 @@ class QuestionsProcessor:
                 use_bge=self.use_bge,
                 embedding_provider=self.embedding_provider,
                 embedding_model=self.embedding_model,
-                reranker_type=self.reranker_type
+                reranker_type=self.reranker_type,
+                domain=self.domain
             )
         else:
             retriever = VectorRetriever(
@@ -321,6 +588,18 @@ class QuestionsProcessor:
             "retrieval_query": retrieval_query,
             "answer_similarity": similarity_scores
         }
+        answer_dict["final_answer"] = self._normalize_finance_numeric_answer(
+            answer=answer_dict["final_answer"],
+            schema=schema
+        )
+        checked_answer, finance_checks = self._apply_finance_currency_consistency(
+            answer=answer_dict["final_answer"],
+            question=question,
+            retrieval_results=retrieval_results,
+            schema=schema
+        )
+        answer_dict["final_answer"] = checked_answer
+        answer_dict["finance_checks"] = finance_checks
         
         # 保存响应数据
         self.response_data = {"model": "gpt-4o-2024-08-06", "input_tokens": 0, "output_tokens": 0}  # 简化处理
@@ -413,6 +692,7 @@ class QuestionsProcessor:
                 "relevant_pages": answer_dict.get('relevant_pages'),
                 "retrieval_query": answer_dict.get("retrieval_query"),
                 "answer_similarity": answer_dict.get("answer_similarity"),
+                "finance_checks": answer_dict.get("finance_checks"),
                 "response_data": self.response_data,
                 "self": ref_id
             }
@@ -422,7 +702,10 @@ class QuestionsProcessor:
         """Calculate statistics about processed questions."""
         total_questions = len(processed_questions)
         error_count = sum(1 for q in processed_questions if "error" in q)
-        na_count = sum(1 for q in processed_questions if (q.get("value") if "value" in q else q.get("answer")) == "N/A")
+        na_count = sum(
+            1 for q in processed_questions
+            if self._is_na_like(q.get("value") if "value" in q else q.get("answer"))
+        )
         #没有答案、无法回答、信息不足、找不到相关内容
         #==“N/A”对应的是if和else两个条件
         success_count = total_questions - error_count - na_count
@@ -612,7 +895,8 @@ class QuestionsProcessor:
                     pass
             
             # Clear references if value is N/A
-            if value == "N/A":
+            if self._is_na_like(value):
+                value = "N/A"
                 references = []
             else:
                 # Convert page indices from one-based to zero-based (competition requires 0-based page indices, but for debugging it is easier to use 1-based)
@@ -705,16 +989,34 @@ class QuestionsProcessor:
             sub_question = rephrased_questions.get(company)
             if not sub_question:
                 raise ValueError(f"Could not generate sub-question for company: {company}")
-            
-            answer_dict = self.get_answer_for_company(
-                company_name=company, 
-                question=sub_question, 
-                schema="number",
-                conversation_id=conversation_id,
-                conversation_history=conversation_history,
-                store_conversation_turn=False
-            )
-            return company, answer_dict
+
+            best_answer: Optional[dict] = None
+            retry_queries = [sub_question] + self._build_comparative_company_fallback_queries(question, company)
+            for candidate_query in retry_queries:
+                try:
+                    answer_dict = self.get_answer_for_company(
+                        company_name=company,
+                        question=candidate_query,
+                        schema="number",
+                        conversation_id=conversation_id,
+                        conversation_history=conversation_history,
+                        store_conversation_turn=False
+                    )
+                    best_answer = self._choose_better_numeric_company_answer(answer_dict, best_answer)
+                    if best_answer and not self._is_na_like(best_answer.get("final_answer")):
+                        break
+                except Exception:
+                    continue
+
+            if best_answer is None:
+                best_answer = {
+                    "final_answer": "N/A",
+                    "step_by_step_analysis": f"No report found for company '{company}'.",
+                    "reasoning_summary": f"No report found for company '{company}'.",
+                    "references": [],
+                    "relevant_pages": [],
+                }
+            return company, best_answer
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
             future_to_company = {
@@ -734,7 +1036,13 @@ class QuestionsProcessor:
                 except Exception as e:
                     company = future_to_company[future]
                     print(f"Error processing company {company}: {str(e)}")
-                    raise
+                    individual_answers[company] = {
+                        "final_answer": "N/A",
+                        "step_by_step_analysis": f"Error processing company {company}: {str(e)}",
+                        "reasoning_summary": f"Error processing company {company}: {str(e)}",
+                        "references": [],
+                        "relevant_pages": [],
+                    }
         
         # Remove duplicate references
         unique_refs = {}
@@ -759,10 +1067,28 @@ class QuestionsProcessor:
             context=comparative_context,
             schema="comparative"
         )
+
+        # Use deterministic numeric ranking as the primary decision for name comparisons.
+        # This avoids model drift when one company is missing or cross-currency language appears.
+        comparative_answer_value = comparative_result.answer
+        if schema == "name":
+            fallback_company = self._fallback_comparative_name_answer(question, individual_answers)
+            if fallback_company:
+                comparative_answer_value = fallback_company
+            else:
+                valid_companies = [
+                    company for company, answer in individual_answers.items()
+                    if not self._is_na_like(answer.get("final_answer"))
+                ]
+                if comparative_answer_value not in valid_companies:
+                    if len(valid_companies) == 1:
+                        comparative_answer_value = valid_companies[0]
+                    elif len(valid_companies) == 0:
+                        comparative_answer_value = "N/A"
         
         # 构建比较性答案字典
         comparative_answer = {
-            "final_answer": comparative_result.answer,
+            "final_answer": comparative_answer_value,
             "step_by_step_analysis": comparative_result.reasoning,
             "reasoning_summary": comparative_result.reasoning,
             "relevant_pages": [citation['page'] for citation in comparative_result.citations if citation['is_valid']],

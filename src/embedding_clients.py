@@ -36,11 +36,23 @@ class EmbeddingAPIClient:
             return OpenAI(api_key=api_key, base_url=base_url, timeout=None, max_retries=2)
         return OpenAI(api_key=api_key, timeout=None, max_retries=2)
 
-    def embed_texts(self, texts: List[str], batch_size: int = 512) -> List[List[float]]:
+    def _sanitize_text(self, text: str) -> str:
+        cleaned = " ".join(text.split())
+        if self.provider in {"bge", "bge_api"}:
+            # Some BGE gateways require each input to be under ~512 tokens.
+            # Char-level truncation is a robust proxy without extra tokenizer dependency.
+            return cleaned[:350]
+        return cleaned
+
+    def embed_texts(self, texts: List[str], batch_size: Optional[int] = None) -> List[List[float]]:
         if not texts:
             return []
         if any((not isinstance(text, str)) or (not text.strip()) for text in texts):
             raise ValueError("All embedding inputs must be non-empty strings.")
+        texts = [self._sanitize_text(text) for text in texts]
+        if batch_size is None:
+            # Some OpenAI-compatible BGE gateways enforce small batch limits (e.g. 32).
+            batch_size = 1 if self.provider in {"bge", "bge_api"} else 512
 
         embeddings: List[List[float]] = []
         for i in range(0, len(texts), batch_size):

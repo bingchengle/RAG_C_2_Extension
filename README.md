@@ -1,42 +1,17 @@
-# RAG Challenge 2（扩展版分支）
+# RAG Challenge 2（扩展版）
 
-这是一个面向年报长文档问答的 RAG 系统实现，基于比赛获奖方案扩展，新增了多模型嵌入、多轮会话与可靠性校验能力。
+基于原始获奖项目 [IlyaRice/RAG-Challenge-2](https://github.com/IlyaRice/RAG-Challenge-2) 的中文扩展版本，面向公司年报问答场景。
 
-上游参考仓库：  
-- [bingchengle/RAG-Challenge-2](https://github.com/bingchengle/RAG-Challenge-2)
+## 核心增强
 
-## 本分支新增能力
-
-- 检索前查询改写（Query Rewrite）
-- 多轮对话管理（`conversation_id` + 历史窗口）
+- 查询改写（Query Rewrite）
+- 多轮会话记忆
 - 答案与上下文相似度校验
-- 多模型嵌入支持（`openai` / `bge_api`）
-- 可选 BGE API 重排（`reranker_type="bge"`）
-- 更可控的集成测试（默认不触发外部 API）
+- 多嵌入模型支持（`openai` / `bge_api`）
+- BGE 重排支持
+- `enhanced / legacy` 运行模式切换
 
-## 项目结构
-
-```text
-.
-├── main.py                         # Click CLI 入口
-├── src/
-│   ├── pipeline.py                 # 全流程 Pipeline + 运行配置
-│   ├── questions_processing.py     # 问答主流程（改写/检索/会话）
-│   ├── retrieval.py                # 向量/BM25/混合检索 + 重排
-│   ├── ingestion.py                # 向量库与 BM25 索引构建
-│   ├── embedding_clients.py        # OpenAI/BGE 嵌入与 BGE 重排客户端
-│   ├── answer_generator_optimized.py
-│   ├── api_requests.py
-│   └── ...
-├── data/
-│   ├── test_set/                   # 小规模可运行数据
-│   └── erc2_set/                   # 全量竞赛元数据与问题集
-├── test_*.py                       # 冒烟/集成测试
-├── requirements.txt
-└── .env.example
-```
-
-## 环境安装
+## 快速开始
 
 ```bash
 python -m venv venv
@@ -44,81 +19,105 @@ venv\Scripts\Activate.ps1
 pip install -e . -r requirements.txt
 ```
 
-将 `.env.example` 复制为 `.env`，并填写密钥。
+将 `.env.example` 复制为 `.env`，至少配置：
 
-常用必填项：
 - `OPENAI_API_KEY`
-- `OPENAI_BASE_URL`（如果你使用代理，通常是 `.../v1`）
-- `BGE_API_KEY`（当使用 `bge_api` 嵌入或 BGE 重排时）
+- `OPENAI_BASE_URL`（代理通常要带 `/v1`）
+- `BGE_API_KEY`（使用 BGE 时）
 
-## 数据集说明
-
-`data/test_set/` 目录包含：
-- `questions.json`、`subset.csv`
-- `databases.zip`（预处理后的检索数据）
-- `pdf_reports/`（原始 PDF）
-- 示例答案文件
-
-快速使用预处理数据：
-1. 解压 `data/test_set/databases.zip`
-2. 确认目录结构如下：
-   - `data/test_set/databases/chunked_reports`
-   - `data/test_set/databases/vector_dbs`
-
-> `databases/` 体积较大，通常不建议重复生成后提交。
-
-## 快速运行
-
-在测试数据目录执行：
+运行（推荐增强模式）：
 
 ```bash
 cd data/test_set
-python ..\..\main.py process-questions --config base
+python ..\..\main.py process-questions --config base --profile enhanced
 ```
 
-运行后会在 `data/test_set/` 下生成 `answers_*.json`。
+## 运行模式
 
-## 嵌入与重排配置
-
-在 `src/pipeline.py` 的 `RunConfig` 中配置：
-
-- `embedding_provider`: `"openai"` 或 `"bge_api"`
-- `embedding_model`: 可选，手动覆盖模型名
-- `reranker_type`: `"llm"` 或 `"bge"`
+- `enhanced`（默认）：改造后结构，默认 BGE 优先（`bge_api + bge`）
+- `legacy`：原项目风格，默认 `openai + llm reranker`
 
 示例：
 
-```python
-RunConfig(
-    embedding_provider="bge_api",
-    embedding_model="BAAI/bge-large-zh-v1.5",
-    llm_reranking=True,
-    reranker_type="bge",
-)
+```bash
+python main.py process-questions --config base --profile enhanced
+python main.py process-questions --config base --profile legacy
+python main.py process-questions --config base --profile enhanced --embedding-provider openai --reranker-type llm
 ```
 
-## 多轮对话与查询改写
+## 金融垂直模式
 
-`QuestionsProcessor` 支持：
-- `enable_query_rewrite=True`
-- `enable_multi_turn=True`
-- `conversation_max_turns=<N>`
+```bash
+cd data/test_set
+python ..\..\main.py process-questions --config finance_vertical --profile enhanced
+```
 
-每条问题可选字段：
-- `conversation_id`
-- `conversation_history`（或 `history`）
+评测：
 
-若未传入外部历史，系统会按 `conversation_id` 从内部会话存储中读取历史。
+```bash
+python scripts/finance_eval.py --pred data/test_set/answers_finance_vertical.json
+python scripts/finance_eval.py --pred data/test_set/answers_finance_vertical.json --gold data/test_set/answers_max_nst_o3m.json
+```
 
-## 测试说明
+### 设计构思
 
-- `test_final.py`：导入冒烟测试
-- `test_api_answer_generator.py`
-- `test_embedding_comparison.py`
-- `test_fallback.py`
-- `test_answer_generator_optimized.py`
+金融问答的核心难点不是“能否回答”，而是“口径是否正确”。  
+同一个问题中，指标名称、时间范围、币种、单位只要有一个不一致，就可能产生看似合理但实际错误的答案。
 
-后四项为集成测试，默认跳过；开启方式：
+因此金融垂直模式的设计目标是：
+
+1. 优先保证口径一致性（宁缺毋滥）
+2. 减少“相关指标替代目标指标”的幻觉
+3. 让检索与生成都围绕金融语义约束工作
+
+### 核心机制
+
+- **检索前约束改写**：保留公司名、财年、单位、币种，不做语义漂移
+- **BGE 优先检索链路**：在金融数据上提升相关片段召回稳定性
+- **金融规则后处理**：对数值答案做单位规范化、币种一致性检查
+- **缺失值保守策略**：上下文不足或口径冲突时返回 `N/A` / 信息不足
+
+### 典型应用场景（给业务方/团队直接使用）
+
+- **投研与研报辅助**：从多家公司年报中快速抽取关键财务指标（营收、净利、现金流、资产负债等）并给出处页码
+- **财务尽调与并购分析**：批量问答目标公司历史财务口径，减少人工翻阅 PDF 的时间成本
+- **审计与内控支持**：对指标口径、币种、单位做一致性校验，降低“数字看起来对但口径错”的风险
+- **IR/董秘与管理层问答支持**：把高频财务问题转成可追溯问答，快速定位原文证据
+- **金融知识库检索中台**：作为企业内部财报问答引擎，为 BI、风控、客服机器人提供结构化问答能力
+
+### 业务意义
+
+- 在财务分析、投研支持、审计辅助等场景中，降低“数字正确但口径错误”的风险
+- 提升结果可解释性：回答更容易追溯到对应页码与原文
+- 更适合做自动化批量问答，因为错误类型更可控、可监控
+
+### 适用边界
+
+- 该模式更偏“保守准确”，在信息缺失时会更倾向拒答
+- 如果你的场景更看重召回覆盖率，可配合 `legacy` 或放宽后处理策略
+
+## 常用实验脚本
+
+- `benchmark_prepare_round1.py`：准备 benchmark 数据
+- `benchmark_compare_round1.py`：跑对比评测
+- `scripts/ab_score_openai_bge.py`：OpenAI vs BGE 打分
+- `scripts/triple_eval_repeats.py`：三组重复实验
+- `scripts/triple_recompute_from_existing.py`：重算修正版均值
+
+## 当前结果（benchmark_round1_soft）
+
+- 改造后 OpenAI vs 改造后 BGE（10题）：`90.00%` vs `100.00%`
+- 三组 3 次重复平均：
+  - 原项目：`93.33%`
+  - 改造后 OpenAI：`83.33%`
+  - 改造后 BGE：`100.00%`
+
+结果文件：
+
+- `data/benchmark_round1_soft/ab_report_openai_vs_bge.json`
+- `data/benchmark_round1_soft/triple_compare_repeats_report_fixed.json`
+
+## 测试
 
 ```bash
 $env:RUN_INTEGRATION_TESTS="1"

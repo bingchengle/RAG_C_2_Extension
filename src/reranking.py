@@ -35,10 +35,19 @@ class JinaReranker:
         return response.json()
 
 class LLMReranker:
-    def __init__(self):
+    def __init__(self, domain: str = "general"):
         self.llm = self.set_up_llm()
+        self.domain = (domain or "general").lower()
         self.system_prompt_rerank_single_block = prompts.RerankingPrompt.system_prompt_rerank_single_block
         self.system_prompt_rerank_multiple_blocks = prompts.RerankingPrompt.system_prompt_rerank_multiple_blocks
+        if self.domain == "finance":
+            finance_suffix = (
+                "\n\nFinance-specific instruction:\n"
+                "- Prioritize blocks with exact metric names, year/period alignment, currency/unit consistency, and explicit numeric disclosures.\n"
+                "- Penalize blocks that only contain related but not equivalent metrics."
+            )
+            self.system_prompt_rerank_single_block += finance_suffix
+            self.system_prompt_rerank_multiple_blocks += finance_suffix
         self.schema_for_single_block = prompts.RetrievalRankingSingleBlock
         self.schema_for_multiple_blocks = prompts.RetrievalRankingMultipleBlocks
       #schema_for_single_block/schema_for_multiple_blocks：是预定义的 Pydantic 模型（或 JSON Schema），用于约束 LLM 返回的格式（比如强制返回 relevance_score 字段），确保输出结构化、可解析

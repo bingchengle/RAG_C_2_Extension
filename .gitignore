@@ -172,7 +172,13 @@ cython_debug/
 
 # Local helper clone used for dataset sync
 _upstream_source/
+_challenge_source/
+
+# Local benchmark artifacts
+data/benchmark_round1_*/
+data/benchmark_*/
 
 # Local run outputs
 data/test_set/answers_base*.json
 data/test_set/answers_full_context_smoke*.json
+data/test_set/answers_finance_vertical*.json

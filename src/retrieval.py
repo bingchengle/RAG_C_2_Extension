@@ -265,7 +265,8 @@ class HybridRetriever:
         use_bge: bool = False,
         embedding_provider: str = "openai",
         embedding_model: str = None,
-        reranker_type: str = "llm"
+        reranker_type: str = "llm",
+        domain: str = "general"
     ):
         self.vector_retriever = VectorRetriever(
             vector_db_dir,
@@ -276,7 +277,7 @@ class HybridRetriever:
         )
         self.bm25_retriever = BM25Retriever(bm25_db_dir, documents_dir)
         self.reranker_type = (reranker_type or "llm").lower()
-        self.reranker = BGERerankerClient() if self.reranker_type == "bge" else LLMReranker()
+        self.reranker = BGERerankerClient() if self.reranker_type == "bge" else LLMReranker(domain=domain)
         
     def retrieve_by_company_name(
         self, 

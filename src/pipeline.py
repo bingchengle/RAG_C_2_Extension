@@ -65,6 +65,11 @@ class RunConfig:
     embedding_provider: str = "openai"
     embedding_model: str = ""
     reranker_type: str = "llm"
+    domain: str = "finance"
+    finance_metric_expansion: bool = True
+    finance_normalize_numeric: bool = True
+    finance_currency_consistency_check: bool = True
+    finance_unit_conversion: bool = True
     enable_query_rewrite: bool = False
     enable_similarity_check: bool = True
     enable_multi_turn: bool = False
@@ -284,6 +289,11 @@ class Pipeline:
             embedding_provider=self.run_config.embedding_provider,
             embedding_model=self.run_config.embedding_model or None,
             reranker_type=self.run_config.reranker_type,
+            domain=self.run_config.domain,
+            finance_metric_expansion=self.run_config.finance_metric_expansion,
+            finance_normalize_numeric=self.run_config.finance_normalize_numeric,
+            finance_currency_consistency_check=self.run_config.finance_currency_consistency_check,
+            finance_unit_conversion=self.run_config.finance_unit_conversion,
             enable_query_rewrite=self.run_config.enable_query_rewrite,
             enable_similarity_check=self.run_config.enable_similarity_check,
             enable_multi_turn=self.run_config.enable_multi_turn,
@@ -454,6 +464,31 @@ gemini_thinking_config_big_context = RunConfig(
     config_suffix="_gemini_thinking_bc"
 )
 
+finance_vertical_config = RunConfig(
+    parent_document_retrieval=True,
+    llm_reranking=True,
+    llm_reranking_sample_size=36,
+    top_n_retrieval=12,
+    parallel_requests=8,
+    api_provider="openai",
+    answering_model="gpt-4o-2024-08-06",
+    embedding_provider="bge_api",
+    embedding_model="BAAI/bge-large-zh-v1.5",
+    reranker_type="bge",
+    domain="finance",
+    finance_metric_expansion=True,
+    finance_normalize_numeric=True,
+    finance_currency_consistency_check=True,
+    finance_unit_conversion=True,
+    enable_query_rewrite=True,
+    enable_similarity_check=True,
+    enable_multi_turn=True,
+    conversation_max_turns=8,
+    submission_name="Finance Vertical RAG",
+    pipeline_details="Finance domain: BGE embeddings + BGE reranker + query rewrite + multi-turn memory + similarity checks",
+    config_suffix="_finance_vertical"
+)
+
 configs = {"base": base_config,
            "pdr": parent_document_retrieval_config,
            "max": max_config, 
@@ -462,7 +497,8 @@ configs = {"base": base_config,
            "max_st_o3m": max_st_o3m_config,
            "ibm_llama70b": ibm_llama70b_config, # This one won't work, because ibm api was avaliable only while contest was running
            "ibm_llama8b": ibm_llama8b_config, # This one won't work, because ibm api was avaliable only while contest was running
-           "gemini_thinking": gemini_thinking_config}
+           "gemini_thinking": gemini_thinking_config,
+           "finance_vertical": finance_vertical_config}
 
 
 # You can run any method right from this file with 

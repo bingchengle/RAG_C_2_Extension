@@ -37,7 +37,8 @@ class AnswerGeneratorOptimized:
         model: str = "gpt-4o-2024-08-06",
         verification_model: str = "gpt-4o-mini-2024-07-18",
         temperature: float = 0.3,
-        max_verification_rounds: int = 2
+        max_verification_rounds: int = 2,
+        domain: str = "general"
     ):
         """
         初始化答案生成器
@@ -59,6 +60,20 @@ class AnswerGeneratorOptimized:
         self.verification_model = verification_model
         self.temperature = temperature
         self.max_verification_rounds = max_verification_rounds
+        self.domain = (domain or "general").lower()
+
+    def _domain_instruction(self) -> str:
+        if self.domain != "finance":
+            return ""
+        return (
+            "\n金融问答额外要求：\n"
+            "- 严格区分指标名称，避免将相近指标当作同一指标。\n"
+            "- 明确时间口径（财年/季度/期末）和单位（元/千元/百万元/%）。\n"
+            "- 若问题明确指定了币种，且上下文仅出现其他币种，返回\"信息不足\"。\n"
+            "- 若问题未指定币种，可在同一币种内比较并明确说明币种差异风险。\n"
+            "- 若上下文没有直接给出目标指标，返回\"信息不足\"。\n"
+            "- 不做推导计算，不用外部知识补全。"
+        )
     
     def generate_answer(
         self,
@@ -126,7 +141,7 @@ class AnswerGeneratorOptimized:
 2. 提供清晰的推理过程
 3. 标注信息来源（页码）
 4. 如果上下文不足以回答问题，明确说明"信息不足"
-5. 对于数字类问题，确保数值准确"""
+5. 对于数字类问题，确保数值准确""" + self._domain_instruction()
 
         user_prompt = f"""上下文：
 {context_text}
@@ -182,7 +197,7 @@ class AnswerGeneratorOptimized:
     "issues": ["问题1", "问题2"],
     "confidence": 0.0-1.0,
     "suggestions": ["改进建议1", "改进建议2"]
-}"""
+}""" + self._domain_instruction()
 
         user_prompt = f"""问题：{query}
 
@@ -228,7 +243,7 @@ class AnswerGeneratorOptimized:
 1. 解决所有指出的问题
 2. 确保答案基于上下文
 3. 保持推理过程的清晰性
-4. 准确标注引用来源"""
+4. 准确标注引用来源""" + self._domain_instruction()
 
         user_prompt = f"""问题：{query}
 
