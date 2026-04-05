@@ -7,6 +7,6 @@ output_dir = Path("./databases/vector_dbs")
 
 # 生成 BGE 嵌入
 print("Generating BGE embeddings...")
-ingestor = VectorDBIngestor()
+ingestor = VectorDBIngestor(embedding_provider="bge_api")
 ingestor.process_reports(all_reports_dir, output_dir, use_bge=True)
 print("BGE embeddings generation completed!")

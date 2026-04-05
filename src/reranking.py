@@ -45,7 +45,11 @@ class LLMReranker:
 
     def set_up_llm(self):
         load_dotenv()
-        llm = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        base_url = os.getenv("OPENAI_BASE_URL")
+        if base_url:
+            llm = OpenAI(api_key=os.getenv("OPENAI_API_KEY"), base_url=base_url)
+        else:
+            llm = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         return llm
     
     def get_rank_for_single_block(self, query, retrieved_document):

@@ -1,5 +1,5 @@
 import json
-from typing import Union, Dict, List, Optional
+from typing import Union, Dict, List, Optional, Any
 import re
 from pathlib import Path
 from src.retrieval import VectorRetriever, HybridRetriever
@@ -29,7 +29,14 @@ class QuestionsProcessor:
         api_provider: str = "openai",
         answering_model: str = "gpt-4o-2024-08-06",
         full_context: bool = False,
-        use_bge: bool = False
+        use_bge: bool = False,
+        embedding_provider: str = "openai",
+        embedding_model: Optional[str] = None,
+        reranker_type: str = "llm",
+        enable_query_rewrite: bool = False,
+        enable_similarity_check: bool = True,
+        enable_multi_turn: bool = False,
+        conversation_max_turns: int = 6
             # Optional[...] 表示参数可以为 None（如 questions_file_path）
             #所有参数都加了类型注解（如 Union[str, Path] 表示支持字符串或 Path 对象）
     ):
@@ -50,6 +57,13 @@ class QuestionsProcessor:
         self.parallel_requests = parallel_requests
         self.api_provider = api_provider
         self.use_bge = use_bge
+        self.embedding_provider = embedding_provider
+        self.embedding_model = embedding_model
+        self.reranker_type = reranker_type
+        self.enable_query_rewrite = enable_query_rewrite
+        self.enable_similarity_check = enable_similarity_check
+        self.enable_multi_turn = enable_multi_turn
+        self.conversation_max_turns = max(1, conversation_max_turns)
         self.openai_processor = APIProcessor(provider=api_provider)
         #self.openai_processor 是一个封装好的 API 处理器，目的是屏蔽不同厂商（如 OpenAI、Anthropic）的 API 调用差异，让后续代码无需关心具体的 API 调用细节。
         self.answer_generator = AnswerGeneratorOptimized()
@@ -58,6 +72,8 @@ class QuestionsProcessor:
         self.answer_details = []
         self.detail_counter = 0# 计数器：记录已处理的问答数量
         self._lock = threading.Lock()
+        self._conversation_lock = threading.Lock()
+        self._conversation_store: Dict[str, List[Dict[str, str]]] = {}
         #self._lock = threading.Lock() 是为了应对 parallel_requests 带来的多线程并发，防止 answer_details、detail_counter 等共享变量被多线程同时修改导致数据错乱
 
     def _load_questions(self, questions_file_path: Optional[Union[str, Path]]) -> List[Dict[str, str]]:
@@ -134,21 +150,139 @@ class QuestionsProcessor:
         
         return validated_pages
 
-    def get_answer_for_company(self, company_name: str, question: str, schema: str) -> dict:
+    def _stringify_history(self, history: List[Dict[str, str]]) -> str:
+        if not history:
+            return "No previous turns."
+        lines = []
+        for turn in history:
+            role = turn.get("role", "user")
+            content = turn.get("content", "")
+            lines.append(f"{role}: {content}")
+        return "\n".join(lines)
+
+    def _get_conversation_history(
+        self,
+        conversation_id: Optional[str],
+        provided_history: Optional[List[Dict[str, str]]] = None
+    ) -> List[Dict[str, str]]:
+        if provided_history:
+            return provided_history
+        if not self.enable_multi_turn or not conversation_id:
+            return []
+        with self._conversation_lock:
+            return list(self._conversation_store.get(conversation_id, []))
+
+    def _store_conversation_turn(
+        self,
+        conversation_id: Optional[str],
+        question: str,
+        answer: str
+    ) -> None:
+        if not self.enable_multi_turn or not conversation_id:
+            return
+        with self._conversation_lock:
+            history = self._conversation_store.get(conversation_id, [])
+            history.append({"role": "user", "content": question})
+            history.append({"role": "assistant", "content": answer})
+            max_messages = self.conversation_max_turns * 2
+            if len(history) > max_messages:
+                history = history[-max_messages:]
+            self._conversation_store[conversation_id] = history
+
+    def _rewrite_query_for_retrieval(
+        self,
+        question: str,
+        company_name: str,
+        conversation_history: Optional[List[Dict[str, str]]] = None
+    ) -> str:
+        if not self.enable_query_rewrite and not conversation_history:
+            return question
+        history_text = self._stringify_history(conversation_history or [])
+        system_prompt = (
+            "You rewrite user questions for document retrieval. "
+            "Preserve entities, timeframe, units, and metric intent. "
+            "Output one single rewritten query only."
+        )
+        user_prompt = (
+            f"Company: {company_name}\n"
+            f"Conversation history:\n{history_text}\n\n"
+            f"Latest user question:\n{question}\n\n"
+            "Return only the rewritten retrieval query."
+        )
+        try:
+            rewritten = self.openai_processor.send_message(
+                model=self.answering_model,
+                temperature=0,
+                system_content=system_prompt,
+                human_content=user_prompt,
+                is_structured=False
+            )
+            if not isinstance(rewritten, str):
+                return question
+            rewritten = rewritten.strip().strip('"').strip()
+            return rewritten or question
+        except Exception:
+            return question
+
+    def _calculate_answer_similarity(self, answer_text: str, retrieval_results: List[Dict[str, Any]]) -> Optional[Dict[str, float]]:
+        if not self.enable_similarity_check or not answer_text or not retrieval_results:
+            return None
+        try:
+            context_text = "\n\n".join(item.get("text", "") for item in retrieval_results[:5] if item.get("text"))
+            if not context_text:
+                return None
+            context_similarity = VectorRetriever.get_strings_cosine_similarity(answer_text, context_text)
+
+            chunk_scores = []
+            for item in retrieval_results[:5]:
+                text = item.get("text", "")
+                if text:
+                    score = VectorRetriever.get_strings_cosine_similarity(answer_text, text)
+                    chunk_scores.append(score)
+
+            best_chunk_similarity = max(chunk_scores) if chunk_scores else context_similarity
+            return {
+                "context_similarity": float(context_similarity),
+                "best_chunk_similarity": float(best_chunk_similarity)
+            }
+        except Exception:
+            return None
+
+    def get_answer_for_company(
+        self,
+        company_name: str,
+        question: str,
+        schema: str,
+        conversation_id: Optional[str] = None,
+        conversation_history: Optional[List[Dict[str, str]]] = None,
+        store_conversation_turn: bool = True
+    ) -> dict:
 
         if self.llm_reranking:
             retriever = HybridRetriever(
                 vector_db_dir=self.vector_db_dir,
                 bm25_db_dir=self.bm25_db_dir,
                 documents_dir=self.documents_dir,
-                use_bge=self.use_bge
+                use_bge=self.use_bge,
+                embedding_provider=self.embedding_provider,
+                embedding_model=self.embedding_model,
+                reranker_type=self.reranker_type
             )
         else:
             retriever = VectorRetriever(
                 vector_db_dir=self.vector_db_dir,
                 documents_dir=self.documents_dir,
-                use_bge=self.use_bge
+                use_bge=self.use_bge,
+                embedding_provider=self.embedding_provider,
+                embedding_model=self.embedding_model
             )
+
+        effective_history = self._get_conversation_history(conversation_id, conversation_history)
+        retrieval_query = self._rewrite_query_for_retrieval(
+            question=question,
+            company_name=company_name,
+            conversation_history=effective_history
+        )
 
         if self.full_context:
             retrieval_results = retriever.retrieve_all(company_name)
@@ -156,7 +290,7 @@ class QuestionsProcessor:
         else:           
             retrieval_results = retriever.retrieve_by_company_name(
                 company_name=company_name,
-                query=question,
+                query=retrieval_query,
                 llm_reranking_sample_size=self.llm_reranking_sample_size,
                 top_n=self.top_n_retrieval,
                 return_parent_pages=self.return_parent_pages
@@ -171,6 +305,10 @@ class QuestionsProcessor:
             context=retrieval_results,
             schema=schema
         )
+        similarity_scores = self._calculate_answer_similarity(
+            answer_text=answer_result.answer,
+            retrieval_results=retrieval_results
+        )
         
         # 构建答案字典
         answer_dict = {
@@ -179,7 +317,9 @@ class QuestionsProcessor:
             "reasoning_summary": answer_result.reasoning,
             "relevant_pages": [citation['page'] for citation in answer_result.citations if citation['is_valid']],
             "confidence": answer_result.confidence,
-            "validation_passed": answer_result.validation_passed
+            "validation_passed": answer_result.validation_passed,
+            "retrieval_query": retrieval_query,
+            "answer_similarity": similarity_scores
         }
         
         # 保存响应数据
@@ -190,6 +330,12 @@ class QuestionsProcessor:
             validated_pages = self._validate_page_references(pages, retrieval_results)
             answer_dict["relevant_pages"] = validated_pages
             answer_dict["references"] = self._extract_references(validated_pages, company_name)
+        if store_conversation_turn:
+            self._store_conversation_turn(
+                conversation_id=conversation_id,
+                question=question,
+                answer=answer_dict["final_answer"]
+            )
         return answer_dict
 
     def _extract_companies_from_subset(self, question_text: str) -> list[str]:
@@ -222,7 +368,13 @@ class QuestionsProcessor:
         
         return found_companies
 
-    def process_question(self, question: str, schema: str):
+    def process_question(
+        self,
+        question: str,
+        schema: str,
+        conversation_id: Optional[str] = None,
+        conversation_history: Optional[List[Dict[str, str]]] = None
+    ):
         if self.new_challenge_pipeline:
             extracted_companies = self._extract_companies_from_subset(question)
         else:
@@ -234,19 +386,33 @@ class QuestionsProcessor:
         
         if len(extracted_companies) == 1:
             company_name = extracted_companies[0]
-            answer_dict = self.get_answer_for_company(company_name=company_name, question=question, schema=schema)
+            answer_dict = self.get_answer_for_company(
+                company_name=company_name,
+                question=question,
+                schema=schema,
+                conversation_id=conversation_id,
+                conversation_history=conversation_history
+            )
             return answer_dict
         else:
-            return self.process_comparative_question(question, extracted_companies, schema)
+            return self.process_comparative_question(
+                question=question,
+                companies=extracted_companies,
+                schema=schema,
+                conversation_id=conversation_id,
+                conversation_history=conversation_history
+            )
     
     def _create_answer_detail_ref(self, answer_dict: dict, question_index: int) -> str:
         """Create a reference ID for answer details and store the details"""
         ref_id = f"#/answer_details/{question_index}"
         with self._lock:
             self.answer_details[question_index] = {
-                "step_by_step_analysis": answer_dict['step_by_step_analysis'],
-                "reasoning_summary": answer_dict['reasoning_summary'],
-                "relevant_pages": answer_dict['relevant_pages'],
+                "step_by_step_analysis": answer_dict.get('step_by_step_analysis'),
+                "reasoning_summary": answer_dict.get('reasoning_summary'),
+                "relevant_pages": answer_dict.get('relevant_pages'),
+                "retrieval_query": answer_dict.get("retrieval_query"),
+                "answer_similarity": answer_dict.get("answer_similarity"),
                 "response_data": self.response_data,
                 "self": ref_id
             }
@@ -314,6 +480,8 @@ class QuestionsProcessor:
 
     def _process_single_question(self, question_data: dict) -> dict:
         question_index = question_data.get("_question_index", 0)
+        conversation_id = question_data.get("conversation_id")
+        conversation_history = question_data.get("conversation_history") or question_data.get("history")
         
         if self.new_challenge_pipeline:
             question_text = question_data.get("text")
@@ -322,7 +490,12 @@ class QuestionsProcessor:
             question_text = question_data.get("question")
             schema = question_data.get("schema")
         try:
-            answer_dict = self.process_question(question_text, schema)
+            answer_dict = self.process_question(
+                question=question_text,
+                schema=schema,
+                conversation_id=conversation_id,
+                conversation_history=conversation_history
+            )
             
             if "error" in answer_dict:
                 detail_ref = self._create_answer_detail_ref({
@@ -349,20 +522,26 @@ class QuestionsProcessor:
                     }
             detail_ref = self._create_answer_detail_ref(answer_dict, question_index)
             if self.new_challenge_pipeline:
-                return {
+                result = {
                     "question_text": question_text,
                     "kind": schema,
                     "value": answer_dict.get("final_answer"),
                     "references": answer_dict.get("references", []),
                     "answer_details": {"$ref": detail_ref}
                 }
+                if conversation_id:
+                    result["conversation_id"] = conversation_id
+                return result
             else:
-                return {
+                result = {
                     "question": question_text,
                     "schema": schema,
                     "answer": answer_dict.get("final_answer"),
                     "answer_details": {"$ref": detail_ref},
                 }
+                if conversation_id:
+                    result["conversation_id"] = conversation_id
+                return result
         except Exception as err:
             return self._handle_processing_error(question_text, schema, err, question_index)
 
@@ -497,7 +676,14 @@ class QuestionsProcessor:
         )
         return result
 
-    def process_comparative_question(self, question: str, companies: List[str], schema: str) -> dict:
+    def process_comparative_question(
+        self,
+        question: str,
+        companies: List[str],
+        schema: str,
+        conversation_id: Optional[str] = None,
+        conversation_history: Optional[List[Dict[str, str]]] = None
+    ) -> dict:
         """
         Process a question involving multiple companies in parallel:
         1. Rephrase the comparative question into individual questions
@@ -523,7 +709,10 @@ class QuestionsProcessor:
             answer_dict = self.get_answer_for_company(
                 company_name=company, 
                 question=sub_question, 
-                schema="number"
+                schema="number",
+                conversation_id=conversation_id,
+                conversation_history=conversation_history,
+                store_conversation_turn=False
             )
             return company, answer_dict
 
@@ -578,12 +767,19 @@ class QuestionsProcessor:
             "reasoning_summary": comparative_result.reasoning,
             "relevant_pages": [citation['page'] for citation in comparative_result.citations if citation['is_valid']],
             "confidence": comparative_result.confidence,
-            "validation_passed": comparative_result.validation_passed
+            "validation_passed": comparative_result.validation_passed,
+            "retrieval_query": question,
+            "answer_similarity": None
         }
         
         # 保存响应数据
         self.response_data = {"model": "gpt-4o-2024-08-06", "input_tokens": 0, "output_tokens": 0}  # 简化处理
         
         comparative_answer["references"] = aggregated_references
+        self._store_conversation_turn(
+            conversation_id=conversation_id,
+            question=question,
+            answer=comparative_answer["final_answer"]
+        )
         return comparative_answer
     

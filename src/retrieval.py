@@ -1,18 +1,13 @@
 import json
 import logging
-from typing import List, Tuple, Dict, Union
+from typing import List, Tuple, Dict
 from rank_bm25 import BM25Okapi
 import pickle
 from pathlib import Path
 import faiss
-from openai import OpenAI
-from dotenv import load_dotenv
-import os
 import numpy as np
 from src.reranking import LLMReranker
-
-# 延迟导入 FlagEmbedding
-FlagModel = None
+from src.embedding_clients import EmbeddingAPIClient, BGERerankerClient
 
 _log = logging.getLogger(__name__)
 '''
@@ -101,52 +96,31 @@ class BM25Retriever:
 
 
 class VectorRetriever:
-    def __init__(self, vector_db_dir: Path, documents_dir: Path, use_bge: bool = False):
+    def __init__(
+        self,
+        vector_db_dir: Path,
+        documents_dir: Path,
+        use_bge: bool = False,
+        embedding_provider: str = "openai",
+        embedding_model: str = None
+    ):
         self.vector_db_dir = vector_db_dir
         self.documents_dir = documents_dir
-        self.use_bge = use_bge
+        self.embedding_provider = "bge_api" if use_bge else (embedding_provider or "openai")
+        self.embedding_model = embedding_model
+        self.vector_db_suffix = "_bge" if self.embedding_provider in {"bge", "bge_api"} else ""
+        self.embedding_client = EmbeddingAPIClient(provider=self.embedding_provider, model=self.embedding_model)
         self.all_dbs = self._load_dbs()
-        self.llm = self._set_up_llm()
-        if use_bge:
-            self.bge_model = self._set_up_bge_model()
-
-    def _set_up_llm(self):
-        load_dotenv()
-        llm = OpenAI(
-            api_key=os.getenv("OPENAI_API_KEY"),
-            timeout=None,
-            max_retries=2
-            )
-        return llm
-    
-    def _set_up_bge_model(self):
-        global FlagModel
-        if FlagModel is None:
-            try:
-                from FlagEmbedding import FlagModel
-            except ImportError as e:
-                raise ImportError(f"FlagEmbedding is not available: {e}. BGE embeddings cannot be used.")
-        return FlagModel(
-            "BAAI/bge-large-zh-v1.5",
-            use_fp16=True
-        )
-    
-    @staticmethod
-    def set_up_llm():
-        load_dotenv()
-        llm = OpenAI(
-            api_key=os.getenv("OPENAI_API_KEY"),
-            timeout=None,
-            max_retries=2
-            )
-        return llm
 
     def _load_dbs(self):
         all_dbs = []
         # Get list of JSON document paths
         all_documents_paths = list(self.documents_dir.glob('*.json'))
-        suffix = "_bge" if self.use_bge else ""
-        vector_db_files = {db_path.stem: db_path for db_path in self.vector_db_dir.glob(f'*{suffix}.faiss')}
+        vector_db_files = {}
+        for db_path in self.vector_db_dir.glob(f"*{self.vector_db_suffix}.faiss"):
+            stem = db_path.stem
+            normalized_stem = stem[:-len(self.vector_db_suffix)] if self.vector_db_suffix and stem.endswith(self.vector_db_suffix) else stem
+            vector_db_files[normalized_stem] = db_path
         
         for document_path in all_documents_paths:
             stem = document_path.stem# 获取当前文档的“文件名”
@@ -182,7 +156,7 @@ class VectorRetriever:
 
     @staticmethod
     def get_strings_cosine_similarity(str1, str2):
-        llm = VectorRetriever.set_up_llm()
+        llm = EmbeddingAPIClient(provider="openai").client
         embeddings = llm.embeddings.create(input=[str1, str2], model="text-embedding-3-large")#可以切换模型
         embedding1 = embeddings.data[0].embedding
         embedding2 = embeddings.data[1].embedding
@@ -216,16 +190,7 @@ class VectorRetriever:
         
         actual_top_n = min(top_n, len(chunks))
         
-        if self.use_bge:
-            # 使用 BGE 模型生成嵌入
-            embedding = self.bge_model.encode(query)
-        else:
-            # 使用 OpenAI 模型生成嵌入
-            embedding = self.llm.embeddings.create(
-                input=query,
-                model="text-embedding-3-large"
-            )
-            embedding = embedding.data[0].embedding
+        embedding = self.embedding_client.embed_texts([query])[0]
         
         #embedding.data[0].embedding：因为 input=query 是单个字符串，所以 data 列表只有 1 个元素，取第一个即可
         embedding_array = np.array(embedding, dtype=np.float32).reshape(1, -1)
@@ -292,11 +257,26 @@ class VectorRetriever:
 
 
 class HybridRetriever:
-    def __init__(self, vector_db_dir: Path, bm25_db_dir: Path, documents_dir: Path, use_bge: bool = False):
-        self.vector_retriever = VectorRetriever(vector_db_dir, documents_dir, use_bge)
+    def __init__(
+        self,
+        vector_db_dir: Path,
+        bm25_db_dir: Path,
+        documents_dir: Path,
+        use_bge: bool = False,
+        embedding_provider: str = "openai",
+        embedding_model: str = None,
+        reranker_type: str = "llm"
+    ):
+        self.vector_retriever = VectorRetriever(
+            vector_db_dir,
+            documents_dir,
+            use_bge=use_bge,
+            embedding_provider=embedding_provider,
+            embedding_model=embedding_model
+        )
         self.bm25_retriever = BM25Retriever(bm25_db_dir, documents_dir)
-        self.reranker = LLMReranker()
-        self.use_bge = use_bge
+        self.reranker_type = (reranker_type or "llm").lower()
+        self.reranker = BGERerankerClient() if self.reranker_type == "bge" else LLMReranker()
         
     def retrieve_by_company_name(
         self, 
@@ -344,14 +324,40 @@ class HybridRetriever:
         merged_results = self._merge_results(vector_results, bm25_results, bm25_weight)
         
         # Rerank results using LLM
-        reranked_results = self.reranker.rerank_documents(
-            query=query,
-            documents=merged_results,
-            documents_batch_size=documents_batch_size,
-            llm_weight=llm_weight
-        )
+        if self.reranker_type == "bge":
+            reranked_results = self._rerank_with_bge(
+                query=query,
+                documents=merged_results,
+                llm_weight=llm_weight
+            )
+        else:
+            reranked_results = self.reranker.rerank_documents(
+                query=query,
+                documents=merged_results,
+                documents_batch_size=documents_batch_size,
+                llm_weight=llm_weight
+            )
         
         return reranked_results[:top_n]
+
+    def _rerank_with_bge(self, query: str, documents: List[Dict], llm_weight: float = 0.7) -> List[Dict]:
+        if not documents:
+            return []
+        texts = [doc.get("text", "") for doc in documents]
+        scores = self.reranker.rerank(query=query, documents=texts)
+        vector_weight = 1 - llm_weight
+        reranked = []
+        for doc, score in zip(documents, scores):
+            doc_with_score = doc.copy()
+            base_vector_score = 1.0 - float(doc.get("distance", 0.0))
+            doc_with_score["relevance_score"] = float(score)
+            doc_with_score["combined_score"] = round(
+                llm_weight * float(score) + vector_weight * base_vector_score,
+                4
+            )
+            reranked.append(doc_with_score)
+        reranked.sort(key=lambda x: x["combined_score"], reverse=True)
+        return reranked
     
     def _merge_results(self, vector_results: List[Dict], bm25_results: List[Dict], bm25_weight: float) -> List[Dict]:
         """

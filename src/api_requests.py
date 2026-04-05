@@ -25,11 +25,20 @@ class BaseOpenaiProcessor:
 
     def set_up_llm(self):
         load_dotenv()
-        llm = OpenAI(
-            api_key=os.getenv("OPENAI_API_KEY"),
-            timeout=None,
-            max_retries=2
-            )
+        base_url = os.getenv("OPENAI_BASE_URL")
+        if base_url:
+            llm = OpenAI(
+                api_key=os.getenv("OPENAI_API_KEY"),
+                base_url=base_url,
+                timeout=None,
+                max_retries=2
+                )
+        else:
+            llm = OpenAI(
+                api_key=os.getenv("OPENAI_API_KEY"),
+                timeout=None,
+                max_retries=2
+                )
         return llm
 
     def send_message(

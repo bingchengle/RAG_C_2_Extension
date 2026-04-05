@@ -1,103 +1,130 @@
-# RAG Challenge Winner Solution
+# RAG Challenge 2（扩展版分支）
 
-**Read more about this project:**
-- Russian: https://habr.com/ru/articles/893356/
-- English: https://abdullin.com/ilya/how-to-build-best-rag/
+这是一个面向年报长文档问答的 RAG 系统实现，基于比赛获奖方案扩展，新增了多模型嵌入、多轮会话与可靠性校验能力。
 
-This repository contains the winning solution for both prize nominations in the RAG Challenge competition. The system achieved state-of-the-art results in answering questions about company annual reports using a combination of:
+上游参考仓库：  
+- [bingchengle/RAG-Challenge-2](https://github.com/bingchengle/RAG-Challenge-2)
 
-- Custom PDF parsing with Docling
-- Vector search with parent document retrieval
-- LLM reranking for improved context relevance
-- Structured output prompting with chain-of-thought reasoning
-- Query routing for multi-company comparisons
+## 本分支新增能力
 
-## Disclaimer
+- 检索前查询改写（Query Rewrite）
+- 多轮对话管理（`conversation_id` + 历史窗口）
+- 答案与上下文相似度校验
+- 多模型嵌入支持（`openai` / `bge_api`）
+- 可选 BGE API 重排（`reranker_type="bge"`）
+- 更可控的集成测试（默认不触发外部 API）
 
-This is competition code - it's scrappy but it works. Some notes before you dive in:
+## 项目结构
 
-- IBM Watson integration won't work (it was competition-specific)
-- The code might have rough edges and weird workarounds
-- No tests, minimal error handling - you've been warned
-- You'll need your own API keys for OpenAI/Gemini
-- GPU helps a lot with PDF parsing (I used 4090)
+```text
+.
+├── main.py                         # Click CLI 入口
+├── src/
+│   ├── pipeline.py                 # 全流程 Pipeline + 运行配置
+│   ├── questions_processing.py     # 问答主流程（改写/检索/会话）
+│   ├── retrieval.py                # 向量/BM25/混合检索 + 重排
+│   ├── ingestion.py                # 向量库与 BM25 索引构建
+│   ├── embedding_clients.py        # OpenAI/BGE 嵌入与 BGE 重排客户端
+│   ├── answer_generator_optimized.py
+│   ├── api_requests.py
+│   └── ...
+├── data/
+│   ├── test_set/                   # 小规模可运行数据
+│   └── erc2_set/                   # 全量竞赛元数据与问题集
+├── test_*.py                       # 冒烟/集成测试
+├── requirements.txt
+└── .env.example
+```
 
-If you're looking for production-ready code, this isn't it. But if you want to explore different RAG techniques and their implementations - check it out!
+## 环境安装
 
-## Quick Start
-
-Clone and setup:
 ```bash
-git clone https://github.com/IlyaRice/RAG-Challenge-2.git
-cd RAG-Challenge-2
 python -m venv venv
-venv\Scripts\Activate.ps1  # Windows (PowerShell)
+venv\Scripts\Activate.ps1
 pip install -e . -r requirements.txt
 ```
 
-Rename `env` to `.env` and add your API keys.
+将 `.env.example` 复制为 `.env`，并填写密钥。
 
-## Test Dataset
+常用必填项：
+- `OPENAI_API_KEY`
+- `OPENAI_BASE_URL`（如果你使用代理，通常是 `.../v1`）
+- `BGE_API_KEY`（当使用 `bge_api` 嵌入或 BGE 重排时）
 
-The repository includes two datasets:
+## 数据集说明
 
-1. A small test set (in `data/test_set/`) with 5 annual reports and questions
-2. The full ERC2 competition dataset (in `data/erc2_set/`) with all competition questions and reports
+`data/test_set/` 目录包含：
+- `questions.json`、`subset.csv`
+- `databases.zip`（预处理后的检索数据）
+- `pdf_reports/`（原始 PDF）
+- 示例答案文件
 
-Each dataset directory contains its own README with specific setup instructions and available files. You can use either dataset to:
+快速使用预处理数据：
+1. 解压 `data/test_set/databases.zip`
+2. 确认目录结构如下：
+   - `data/test_set/databases/chunked_reports`
+   - `data/test_set/databases/vector_dbs`
 
-- Study example questions, reports, and system outputs
-- Run the pipeline from scratch using provided PDFs
-- Use pre-processed data to skip directly to specific pipeline stages
+> `databases/` 体积较大，通常不建议重复生成后提交。
 
-See the respective README files for detailed dataset contents and setup instructions:
-- `data/test_set/README.md` - For the small test dataset
-- `data/erc2_set/README.md` - For the full competition dataset
+## 快速运行
 
-## Usage
+在测试数据目录执行：
 
-You can run any part of pipeline by uncommenting the method you want to run in `src/pipeline.py` and executing:
 ```bash
-python .\src\pipeline.py
+cd data/test_set
+python ..\..\main.py process-questions --config base
 ```
 
-You can also run any pipeline stage using `main.py`, but you need to run it from the directory containing your data:
-```bash
-cd .\data\test_set\
-python ..\..\main.py process-questions --config max_nst_o3m
+运行后会在 `data/test_set/` 下生成 `answers_*.json`。
+
+## 嵌入与重排配置
+
+在 `src/pipeline.py` 的 `RunConfig` 中配置：
+
+- `embedding_provider`: `"openai"` 或 `"bge_api"`
+- `embedding_model`: 可选，手动覆盖模型名
+- `reranker_type`: `"llm"` 或 `"bge"`
+
+示例：
+
+```python
+RunConfig(
+    embedding_provider="bge_api",
+    embedding_model="BAAI/bge-large-zh-v1.5",
+    llm_reranking=True,
+    reranker_type="bge",
+)
 ```
 
-### CLI Commands
+## 多轮对话与查询改写
 
-Get help on available commands:
+`QuestionsProcessor` 支持：
+- `enable_query_rewrite=True`
+- `enable_multi_turn=True`
+- `conversation_max_turns=<N>`
+
+每条问题可选字段：
+- `conversation_id`
+- `conversation_history`（或 `history`）
+
+若未传入外部历史，系统会按 `conversation_id` 从内部会话存储中读取历史。
+
+## 测试说明
+
+- `test_final.py`：导入冒烟测试
+- `test_api_answer_generator.py`
+- `test_embedding_comparison.py`
+- `test_fallback.py`
+- `test_answer_generator_optimized.py`
+
+后四项为集成测试，默认跳过；开启方式：
+
 ```bash
-python main.py --help
+$env:RUN_INTEGRATION_TESTS="1"
+python -m pytest -q
 ```
 
-Available commands:
-- `download-models` - Download required docling models
-- `parse-pdfs` - Parse PDF reports with parallel processing options
-- `serialize-tables` - Process tables in parsed reports
-- `process-reports` - Run the full pipeline on parsed reports
-- `process-questions` - Process questions using specified config
-
-Each command has its own options. For example:
-```bash
-python main.py parse-pdfs --help
-# Shows options like --parallel/--sequential, --chunk-size, --max-workers
-
-python main.py process-reports --config ser_tab
-# Process reports with serialized tables config
-```
-
-## Some configs
-
-- `max_nst_o3m` - Best performing config using OpenAI's o3-mini model
-- `ibm_llama70b` - Alternative using IBM's Llama 70B model
-- `gemini_thinking` - Full context answering with using enormous context window of Gemini. It is not RAG, actually
-
-Check `pipeline.py` for more configs and detils on them.
-
-## License
+## 许可证
 
 MIT

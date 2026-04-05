@@ -17,5 +17,11 @@ To run the system on this test set:
 1. Unpack the required zip files in this directory:
    - `databases.zip` - Contains processed data needed for the pipeline
    - `debug_data.zip` (optional) - Contains intermediate outputs for debugging
+   - After unpacking, make sure processed data is under:
+     - `databases/chunked_reports`
+     - `databases/vector_dbs`
 
-2. Follow the setup and usage instructions in the main README.md at the root of this repository 
+2. Follow the setup and usage instructions in the main README.md at the root of this repository
+   - Quick run command:
+     - `cd data/test_set`
+     - `python ..\..\main.py process-questions --config base`

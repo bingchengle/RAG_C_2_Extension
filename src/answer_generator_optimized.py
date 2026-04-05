@@ -49,7 +49,12 @@ class AnswerGeneratorOptimized:
             max_verification_rounds: 最大验证轮数
         """
         load_dotenv()
-        self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        api_key = os.getenv("OPENAI_API_KEY")
+        base_url = os.getenv("OPENAI_BASE_URL")
+        if base_url:
+            self.client = OpenAI(api_key=api_key, base_url=base_url)
+        else:
+            self.client = OpenAI(api_key=api_key)
         self.model = model
         self.verification_model = verification_model
         self.temperature = temperature

@@ -1,71 +1,59 @@
 import json
-from src.questions_processing import QuestionsProcessor
+import os
 from pathlib import Path
 
-# 测试问题
-questions = [
-    {
-        "text": "特斯拉2023年营收是多少",
-        "kind": "number"
-    },
-    {
-        "text": "特斯拉2023年净利润是多少",
-        "kind": "number"
-    },
-    {
-        "text": "特斯拉2023年收入增长率是多少",
-        "kind": "number"
-    },
-    {
-        "text": "特斯拉2023年净利润增长率是多少",
-        "kind": "number"
-    }
+import pytest
+
+from src.questions_processing import QuestionsProcessor
+
+
+RUN_INTEGRATION = os.getenv("RUN_INTEGRATION_TESTS") == "1"
+pytestmark = pytest.mark.integration
+
+QUESTIONS = [
+    {"text": "特斯拉2023年营收是多少", "kind": "number"},
+    {"text": "特斯拉2023年净利润是多少", "kind": "number"},
+    {"text": "特斯拉2023年收入增长率是多少", "kind": "number"},
+    {"text": "特斯拉2023年净利润增长率是多少", "kind": "number"},
 ]
 
-# 保存测试问题到文件
-with open("test_questions.json", "w", encoding="utf-8") as f:
-    json.dump(questions, f, ensure_ascii=False, indent=2)
 
-# 初始化 QuestionsProcessor
-processor = QuestionsProcessor(
-    vector_db_dir="./databases/vector_dbs",
-    documents_dir="./databases/chunked_reports",
-    questions_file_path="test_questions.json",
-    new_challenge_pipeline=True,
-    subset_path="./subset.csv",
-    parent_document_retrieval=True,
-    llm_reranking=True,
-    llm_reranking_sample_size=30,
-    top_n_retrieval=10,
-    parallel_requests=10,
-    api_provider="openai",
-    answering_model="gpt-4o-mini-2024-07-18",
-    full_context=False
-)
+def _run_test() -> dict:
+    temp_questions = Path("test_questions.json")
+    temp_questions.write_text(json.dumps(QUESTIONS, ensure_ascii=False, indent=2), encoding="utf-8")
 
-# 处理所有问题
-print("Processing questions...")
-result = processor.process_all_questions(
-    output_path="test_answers.json",
-    team_email="test@example.com",
-    submission_name="Test API Answer Generator",
-    submission_file=True,
-    pipeline_details="Using AnswerGeneratorOptimized with API"
-)
+    processor = QuestionsProcessor(
+        vector_db_dir="./databases/vector_dbs",
+        documents_dir="./databases/chunked_reports",
+        questions_file_path=str(temp_questions),
+        new_challenge_pipeline=True,
+        subset_path="./subset.csv",
+        parent_document_retrieval=True,
+        llm_reranking=True,
+        llm_reranking_sample_size=30,
+        top_n_retrieval=10,
+        parallel_requests=10,
+        api_provider="openai",
+        answering_model="gpt-4o-mini-2024-07-18",
+        full_context=False,
+    )
 
-# 打印结果
-print("\nProcessing completed!")
-print(f"Total questions: {result['statistics']['total_questions']}")
-print(f"Successfully answered: {result['statistics']['success_count']}")
-print(f"Errors: {result['statistics']['error_count']}")
-print(f"N/A answers: {result['statistics']['na_count']}")
+    return processor.process_all_questions(
+        output_path="test_answers.json",
+        team_email="test@example.com",
+        submission_name="Test API Answer Generator",
+        submission_file=True,
+        pipeline_details="Integration test for API answer generation",
+    )
 
-# 打印生成的答案
-print("\nGenerated answers:")
-for i, question in enumerate(result['questions']):
-    print(f"\nQuestion {i+1}: {question['question_text']}")
-    print(f"Answer: {question['value']}")
-    if 'error' in question:
-        print(f"Error: {question['error']}")
-    if 'references' in question and question['references']:
-        print(f"References: {question['references']}")
+
+@pytest.mark.skipif(not RUN_INTEGRATION, reason="Set RUN_INTEGRATION_TESTS=1 to run API integration tests.")
+def test_api_answer_generator_integration():
+    result = _run_test()
+    assert "statistics" in result
+    assert result["statistics"]["total_questions"] == len(QUESTIONS)
+
+
+if __name__ == "__main__":
+    result = _run_test()
+    print(result["statistics"])

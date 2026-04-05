@@ -1,19 +1,14 @@
-import os
 import json
 import pickle
 from typing import List, Union
 from pathlib import Path
 from tqdm import tqdm
 
-from dotenv import load_dotenv
-from openai import OpenAI
 from rank_bm25 import BM25Okapi
 import faiss
 import numpy as np
 from tenacity import retry, wait_fixed, stop_after_attempt
-
-# 延迟导入 FlagEmbedding
-FlagModel = None
+from src.embedding_clients import EmbeddingAPIClient
 
 
 class BM25Ingestor:
@@ -53,58 +48,18 @@ class BM25Ingestor:
         print(f"Processed {len(all_report_paths)} reports")
 
 class VectorDBIngestor:
-    def __init__(self):
-        self.llm = self._set_up_llm()
-        self.bge_model = self._set_up_bge_model()
-
-    def _set_up_llm(self):
-        load_dotenv()
-        llm = OpenAI(
-            api_key=os.getenv("OPENAI_API_KEY"),
-            timeout=None,
-            max_retries=2
-        )
-        return llm
-
-    def _set_up_bge_model(self):
-        global FlagModel
-        if FlagModel is None:
-            try:
-                from FlagEmbedding import FlagModel
-            except ImportError as e:
-                raise ImportError(f"FlagEmbedding is not available: {e}. BGE embeddings cannot be used.")
-        return FlagModel(
-            "BAAI/bge-large-zh-v1.5",
-            use_fp16=True
-        )
+    def __init__(self, embedding_provider: str = "openai", embedding_model: str = None):
+        self.embedding_provider = embedding_provider
+        self.embedding_model = embedding_model
+        self.embedding_client = EmbeddingAPIClient(provider=embedding_provider, model=embedding_model)
 
     @retry(wait=wait_fixed(20), stop=stop_after_attempt(2))
-    def _get_embeddings(self, text: Union[str, List[str]], model: str = "text-embedding-3-large") -> List[float]:
+    def _get_embeddings(self, text: Union[str, List[str]]) -> List[float]:
         if isinstance(text, str) and not text.strip():
             raise ValueError("Input text cannot be an empty string.")
         
-        if isinstance(text, list):
-            text_chunks = [text[i:i + 1024] for i in range(0, len(text), 1024)]
-        else:
-            text_chunks = [text]
-
-        embeddings = []
-        for chunk in text_chunks:
-            response = self.llm.embeddings.create(input=chunk, model=model)
-            embeddings.extend([embedding.embedding for embedding in response.data])
-        
-        return embeddings
-
-    def _get_bge_embeddings(self, text: Union[str, List[str]]) -> List[float]:
-        if isinstance(text, str) and not text.strip():
-            raise ValueError("Input text cannot be an empty string.")
-        
-        if isinstance(text, list):
-            embeddings = self.bge_model.encode(text, batch_size=32)
-        else:
-            embeddings = [self.bge_model.encode(text)]
-        
-        return embeddings
+        text_items = text if isinstance(text, list) else [text]
+        return self.embedding_client.embed_texts(text_items)
 
     def _create_vector_db(self, embeddings: List[float]):
         embeddings_array = np.array(embeddings, dtype=np.float32)
@@ -113,25 +68,27 @@ class VectorDBIngestor:
         index.add(embeddings_array)
         return index
     
-    def _process_report(self, report: dict, use_bge: bool = False):
+    def _process_report(self, report: dict):
         text_chunks = [chunk['text'] for chunk in report['content']['chunks']]
-        if use_bge:
-            embeddings = self._get_bge_embeddings(text_chunks)
-        else:
-            embeddings = self._get_embeddings(text_chunks)
+        embeddings = self._get_embeddings(text_chunks)
         index = self._create_vector_db(embeddings)
         return index
 
     def process_reports(self, all_reports_dir: Path, output_dir: Path, use_bge: bool = False):
+        # Backward compatibility: old code used use_bge=True to switch model.
+        if use_bge and self.embedding_provider == "openai":
+            self.embedding_provider = "bge_api"
+            self.embedding_client = EmbeddingAPIClient(provider=self.embedding_provider, model=self.embedding_model)
+
         all_report_paths = list(all_reports_dir.glob("*.json"))
         output_dir.mkdir(parents=True, exist_ok=True)
 
         for report_path in tqdm(all_report_paths, desc="Processing reports"):
             with open(report_path, 'r', encoding='utf-8') as file:
                 report_data = json.load(file)
-            index = self._process_report(report_data, use_bge)
+            index = self._process_report(report_data)
             sha1_name = report_data["metainfo"]["sha1_name"]
-            suffix = "_bge" if use_bge else ""
+            suffix = "_bge" if self.embedding_provider in {"bge", "bge_api"} else ""
             faiss_file_path = output_dir / f"{sha1_name}{suffix}.faiss"
             faiss.write_index(index, str(faiss_file_path))
 

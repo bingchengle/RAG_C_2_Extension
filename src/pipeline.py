@@ -62,6 +62,13 @@ class RunConfig:
     api_provider: str = "openai"
     answering_model: str = "gpt-4o-mini-2024-07-18" #or "gpt-4o-2024-08-06"
     config_suffix: str = ""
+    embedding_provider: str = "openai"
+    embedding_model: str = ""
+    reranker_type: str = "llm"
+    enable_query_rewrite: bool = False
+    enable_similarity_check: bool = True
+    enable_multi_turn: bool = False
+    conversation_max_turns: int = 6
 
 class Pipeline:
     def __init__(self, root_path: Path, subset_name: str = "subset.csv", questions_file_name: str = "questions.json", pdf_reports_dir_name: str = "pdf_reports", run_config: RunConfig = RunConfig()):
@@ -190,8 +197,13 @@ class Pipeline:
         input_dir = self.paths.documents_dir
         output_dir = self.paths.vector_db_dir
         
-        vdb_ingestor = VectorDBIngestor()
-        vdb_ingestor.process_reports(input_dir, output_dir)
+        embedding_model = self.run_config.embedding_model or None
+        vdb_ingestor = VectorDBIngestor(
+            embedding_provider=self.run_config.embedding_provider,
+            embedding_model=embedding_model
+        )
+        use_bge_legacy = self.run_config.embedding_provider in {"bge", "bge_api"}
+        vdb_ingestor.process_reports(input_dir, output_dir, use_bge=use_bge_legacy)
         print(f"Vector databases created in {output_dir}")
     
     def create_bm25_db(self):
@@ -268,7 +280,14 @@ class Pipeline:
             parallel_requests=self.run_config.parallel_requests,
             api_provider=self.run_config.api_provider,
             answering_model=self.run_config.answering_model,
-            full_context=self.run_config.full_context            
+            full_context=self.run_config.full_context,
+            embedding_provider=self.run_config.embedding_provider,
+            embedding_model=self.run_config.embedding_model or None,
+            reranker_type=self.run_config.reranker_type,
+            enable_query_rewrite=self.run_config.enable_query_rewrite,
+            enable_similarity_check=self.run_config.enable_similarity_check,
+            enable_multi_turn=self.run_config.enable_multi_turn,
+            conversation_max_turns=self.run_config.conversation_max_turns
         )
         
         output_path = self._get_next_available_filename(self.paths.answers_file_path)
