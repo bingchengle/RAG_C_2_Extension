@@ -1,3 +1,4 @@
+import argparse
 import json
 import sys
 from pathlib import Path
@@ -6,11 +7,15 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import benchmark_compare_round1 as bc
+from src.benchmark import compare_round1 as bc
+from src.data_paths import BENCHMARK_ROUND1_SOFT_DIR
 
 
 def main() -> None:
-    base = ROOT / "data" / "benchmark_round1_soft"
+    ap = argparse.ArgumentParser()
+    args = ap.parse_args()
+
+    base = BENCHMARK_ROUND1_SOFT_DIR
     gold = json.loads((base / "gold_answers.json").read_text(encoding="utf-8"))
 
     openai_payload = json.loads((base / "answers_improved_openai_debug.json").read_text(encoding="utf-8"))
@@ -22,6 +27,7 @@ def main() -> None:
 
     report = {
         "benchmark": str(base.resolve()),
+        "score_protocol": proto,
         "openai": {k: v for k, v in openai.items() if k != "rows"},
         "bge": {k: v for k, v in bge.items() if k != "rows"},
         "delta_bge_minus_openai": delta,
@@ -30,6 +36,7 @@ def main() -> None:
     out = base / "ab_report_openai_vs_bge.json"
     out.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
 
+    print("score_protocol=strict")
     print("OPENAI", openai["correct"], openai["total"], f"{openai['accuracy']:.2%}")
     print("BGE", bge["correct"], bge["total"], f"{bge['accuracy']:.2%}")
     print("DELTA", f"{delta:+.2%}")

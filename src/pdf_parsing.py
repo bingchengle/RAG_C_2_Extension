@@ -3,26 +3,26 @@ import time
 import logging
 import re
 import json
-from tabulate import tabulate#把数据打印成美观的表格
+from tabulate import tabulate
 from pathlib import Path
 from typing import Iterable, List
 
-# from docling.backend.docling_parse_backend import DoclingParseDocumentBackend
+
 from docling.backend.docling_parse_v2_backend import DoclingParseV2DocumentBackend
-# from docling.backend.pypdfium2_backend import PyPdfiumDocumentBackend
-from docling.datamodel.base_models import ConversionStatus#状态标记
-from docling.datamodel.document import ConversionResult#获取解析结果
+
+from docling.datamodel.base_models import ConversionStatus
+from docling.datamodel.document import ConversionResult
 
 _log = logging.getLogger(__name__)
 
 def _process_chunk(pdf_paths, pdf_backend, output_dir, num_threads, metadata_lookup, debug_data_path):
     """Helper function to process a chunk of PDFs in a separate process."""
-    # Create a new parser instance for this process
+
     parser = PDFParser(
-        pdf_backend=pdf_backend,#用哪个 PDF 解析引擎（就是你刚才导入的 docling 解析器）
+        pdf_backend=pdf_backend,
         output_dir=output_dir,
         num_threads=num_threads,
-        csv_metadata_path=None  # Metadata lookup is passed directly
+        csv_metadata_path=None
     )
     parser.metadata_lookup = metadata_lookup
     parser.debug_data_path = debug_data_path
@@ -46,7 +46,7 @@ class PDFParser:
 
         if csv_metadata_path is not None:
             self.metadata_lookup = self._parse_csv_metadata(csv_metadata_path)
-            
+
         if self.num_threads is not None:
             os.environ["OMP_NUM_THREADS"] = str(self.num_threads)
 
@@ -55,33 +55,33 @@ class PDFParser:
         """Parse CSV file and create a lookup dictionary with sha1 as key."""
         import csv
         metadata_lookup = {}
-        
+
         with open(csv_path, 'r', encoding='utf-8') as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
-                # Handle both old and new CSV formats for company name
+
                 company_name = row.get('company_name', row.get('name', '')).strip('"')
                 metadata_lookup[row['sha1']] = {
                     'company_name': company_name
                 }
         return metadata_lookup
 
-    def _create_document_converter(self) -> "DocumentConverter": # type: ignore
+    def _create_document_converter(self) -> "DocumentConverter":
         """Creates and returns a DocumentConverter with default pipeline options."""
         from docling.document_converter import DocumentConverter, FormatOption
-        from docling.datamodel.pipeline_options import PdfPipelineOptions, TableFormerMode, EasyOcrOptions#OCR 配置：识别语言、精度、GPU 加速等
+        from docling.datamodel.pipeline_options import PdfPipelineOptions, TableFormerMode, EasyOcrOptions
         from docling.datamodel.base_models import InputFormat
         from docling.pipeline.standard_pdf_pipeline import StandardPdfPipeline
-        
+
         pipeline_options = PdfPipelineOptions()
-        pipeline_options.do_ocr = True#开启 OCR 图片文字识别
+        pipeline_options.do_ocr = True
         ocr_options = EasyOcrOptions(lang=['en'], force_full_page_ocr=False)
-        #lang=['en']：只识别英文;force_full_page_ocr=False：不强制整页都 OCR
+
         pipeline_options.ocr_options = ocr_options
-        pipeline_options.do_table_structure = True#不是只读文字，还要把表格边框等解析出来
-        pipeline_options.table_structure_options.do_cell_matching = True#精准识别每个单元格的内容
-        pipeline_options.table_structure_options.mode = TableFormerMode.ACCURATE#高精度表格解析模式
-        
+        pipeline_options.do_table_structure = True
+        pipeline_options.table_structure_options.do_cell_matching = True
+        pipeline_options.table_structure_options.mode = TableFormerMode.ACCURATE
+
         format_options = {
             InputFormat.PDF: FormatOption(
                 pipeline_cls=StandardPdfPipeline,
@@ -89,13 +89,13 @@ class PDFParser:
                 backend=self.pdf_backend
             )
         }
-        
+
         return DocumentConverter(format_options=format_options)
 
-    def convert_documents(self, input_doc_paths: List[Path]) -> Iterable[ConversionResult]:#Iterable = 可迭代；ConversionResult = 每一个文档解析后的结果包
+    def convert_documents(self, input_doc_paths: List[Path]) -> Iterable[ConversionResult]:
         conv_results = self.doc_converter.convert_all(source=input_doc_paths)
         return conv_results
-    
+
     def process_documents(self, conv_results: Iterable[ConversionResult]):
         if self.output_dir is not None:
             self.output_dir.mkdir(parents=True, exist_ok=True)
@@ -106,11 +106,11 @@ class PDFParser:
             if conv_res.status == ConversionStatus.SUCCESS:
                 success_count += 1
                 processor = JsonReportProcessor(metadata_lookup=self.metadata_lookup, debug_data_path=self.debug_data_path)
-                
-                # Normalize the document data to ensure sequential pages
+
+
                 data = conv_res.document.export_to_dict()
                 normalized_data = self._normalize_page_sequence(data)
-                
+
                 processed_report = processor.assemble_report(conv_res, normalized_data)
                 doc_filename = conv_res.input.file.stem
                 if self.output_dir is not None:
@@ -127,30 +127,30 @@ class PDFParser:
         """Ensure that page numbers in content are sequential by filling gaps with empty pages."""
         if 'content' not in data:
             return data
-        
-        # Create a copy of the data to modify
+
+
         normalized_data = data.copy()
-        
-        # Get existing page numbers and find max page
+
+
         existing_pages = {page['page'] for page in data['content']}
         max_page = max(existing_pages)
-        
-        # Create template for empty page
+
+
         empty_page_template = {
             "content": [],
-            "page_dimensions": {}  # or some default dimensions if needed
+            "page_dimensions": {}
         }
-        
-        # Create new content array with all pages
+
+
         new_content = []
         for page_num in range(1, max_page + 1):
-            # Find existing page or create empty one
+
             page_content = next(
                 (page for page in data['content'] if page['page'] == page_num),
                 {"page": page_num, **empty_page_template}
             )
             new_content.append(page_content)
-        
+
         normalized_data['content'] = new_content
         return normalized_data
 
@@ -158,10 +158,10 @@ class PDFParser:
         start_time = time.time()
         if input_doc_paths is None and doc_dir is not None:
             input_doc_paths = list(doc_dir.glob("*.pdf"))
-        
+
         total_docs = len(input_doc_paths)
         _log.info(f"Starting to process {total_docs} documents")
-        
+
         conv_results = self.convert_documents(input_doc_paths)
         success_count, failure_count = self.process_documents(conv_results=conv_results)
         elapsed_time = time.time() - start_time
@@ -183,7 +183,7 @@ class PDFParser:
         chunk_size: int = None
     ):
         """Parse PDF files in parallel using multiple processes.
-        
+
         Args:
             input_doc_paths: List of paths to PDF files to process
             doc_dir: Directory containing PDF files (used if input_doc_paths is None)
@@ -192,24 +192,24 @@ class PDFParser:
         import multiprocessing
         from concurrent.futures import ProcessPoolExecutor, as_completed
 
-        # Get input paths if not provided
+
         if input_doc_paths is None and doc_dir is not None:
             input_doc_paths = list(doc_dir.glob("*.pdf"))
 
         total_pdfs = len(input_doc_paths)
         _log.info(f"Starting parallel processing of {total_pdfs} documents")
-        
+
         cpu_count = multiprocessing.cpu_count()
-        
-        # Calculate optimal workers if not specified
+
+
         if optimal_workers is None:
             optimal_workers = min(cpu_count, total_pdfs)
-        
+
         if chunk_size is None:
-            # Calculate chunk size (ensure at least 1)
+
             chunk_size = max(1, total_pdfs // optimal_workers)
-        
-        # Split documents into chunks
+
+
         chunks = [
             input_doc_paths[i : i + chunk_size]
             for i in range(0, total_pdfs, chunk_size)
@@ -217,10 +217,10 @@ class PDFParser:
 
         start_time = time.time()
         processed_count = 0
-        
-        # Use ProcessPoolExecutor for parallel processing
+
+
         with ProcessPoolExecutor(max_workers=optimal_workers) as executor:
-            # Schedule all tasks
+
             futures = [
                 executor.submit(
                     _process_chunk,
@@ -233,12 +233,12 @@ class PDFParser:
                 )
                 for chunk in chunks
             ]
-            
-            # Wait for completion and log results
+
+
             for future in as_completed(futures):
                 try:
                     result = future.result()
-                    processed_count += int(result.split()[1])  # Extract number from "Processed X PDFs"
+                    processed_count += int(result.split()[1])
                     _log.info(f"{'#'*50}\n{result} ({processed_count}/{total_pdfs} total)\n{'#'*50}")
                 except Exception as e:
                     _log.error(f"Error processing chunk: {str(e)}")
@@ -263,7 +263,7 @@ class JsonReportProcessor:
         assembled_report['pictures'] = self.assemble_pictures(data)
         self.debug_data(data)
         return assembled_report
-    
+
     def assemble_metainfo(self, data):
         metainfo = {}
         sha1_name = data['origin']['filename'].rsplit('.', 1)[0]
@@ -274,16 +274,16 @@ class JsonReportProcessor:
         metainfo['pictures_amount'] = len(data.get('pictures', []))
         metainfo['equations_amount'] = len(data.get('equations', []))
         metainfo['footnotes_amount'] = len([t for t in data.get('texts', []) if t.get('label') == 'footnote'])
-        
-        # Add CSV metadata if available
+
+
         if self.metadata_lookup and sha1_name in self.metadata_lookup:
             csv_meta = self.metadata_lookup[sha1_name]
             metainfo['company_name'] = csv_meta['company_name']
-            
+
         return metainfo
 
     def process_table(self, table_data):
-        # Implement your table processing logic here
+
         return 'processed_table_content'
 
     def debug_data(self, data):
@@ -291,12 +291,12 @@ class JsonReportProcessor:
             return
         doc_name = data['name']
         path = self.debug_data_path / f"{doc_name}.json"
-        path.parent.mkdir(parents=True, exist_ok=True)    
+        path.parent.mkdir(parents=True, exist_ok=True)
         with path.open("w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
 
     def expand_groups(self, body_children, groups):
-        #body_children：文档正文里的内容列表
+
         expanded_children = []
 
         for item in body_children:
@@ -312,7 +312,7 @@ class JsonReportProcessor:
                     group_label = group.get('label', '')
 
                     for child in group['children']:
-                        #children 是数据里的固定字段名 **，意思是：这个组里面包含的子内容
+
                         child_copy = child.copy()
                         child_copy['group_id'] = group_id
                         child_copy['group_name'] = group_name
@@ -324,14 +324,14 @@ class JsonReportProcessor:
                 expanded_children.append(item)
 
         return expanded_children
-    
+
     def _process_text_reference(self, ref_num, data):
         """Helper method to process text references and create content items.
-        
+
         Args:
             ref_num (int): Reference number for the text item
             data (dict): Document data dictionary
-            
+
         Returns:
             dict: Processed content item with text information
         """
@@ -342,29 +342,29 @@ class JsonReportProcessor:
             'type': item_type,
             'text_id': ref_num
         }
-        
-        # Add 'orig' field only if it differs from 'text'
-        #orig = 原始文字（OCR 识别前 / 未修正的文字）
+
+
+
         orig_content = text_item.get('orig', '')
         if orig_content != text_item.get('text', ''):
             content_item['orig'] = orig_content
 
-        # Add additional fields if they exist
-        if 'enumerated' in text_item:#列表编号（enumerated）
+
+        if 'enumerated' in text_item:
             content_item['enumerated'] = text_item['enumerated']
-        if 'marker' in text_item:#标记符号（marker，如・、■）
+        if 'marker' in text_item:
             content_item['marker'] = text_item['marker']
-            
+
         return content_item
-    
+
     def assemble_content(self, data):
         pages = {}
-        # Expand body children to include group references
+
         body_children = data['body']['children']
         groups = data.get('groups', [])
         expanded_body_children = self.expand_groups(body_children, groups)
 
-        # Process body content
+
         for item in expanded_body_children:
             if isinstance(item, dict) and '$ref' in item:
                 ref = item['$ref']
@@ -375,17 +375,17 @@ class JsonReportProcessor:
                     text_item = data['texts'][ref_num]
                     content_item = self._process_text_reference(ref_num, data)
 
-                    # Add group information if available
+
                     if 'group_id' in item:
                         content_item['group_id'] = item['group_id']
                         content_item['group_name'] = item['group_name']
                         content_item['group_label'] = item['group_label']
 
-                    # Get page number from prov
+
                     if 'prov' in text_item and text_item['prov']:
                         page_num = text_item['prov'][0]['page_no']
 
-                        # Initialize page if not exists
+
                         if page_num not in pages:
                             pages[page_num] = {
                                 'page': page_num,
@@ -413,14 +413,14 @@ class JsonReportProcessor:
                             }
 
                         pages[page_num]['content'].append(content_item)
-                
+
                 elif ref_type == 'pictures':
                     picture_item = data['pictures'][ref_num]
                     content_item = {
                         'type': 'picture',
                         'picture_id': ref_num
                     }
-                    
+
                     if 'prov' in picture_item and picture_item['prov']:
                         page_num = picture_item['prov'][0]['page_no']
 
@@ -430,7 +430,7 @@ class JsonReportProcessor:
                                 'content': [],
                                 'page_dimensions': picture_item['prov'][0].get('bbox', {})
                             }
-                        
+
                         pages[page_num]['content'].append(content_item)
 
         sorted_pages = [pages[page_num] for page_num in sorted(pages.keys())]
@@ -442,18 +442,18 @@ class JsonReportProcessor:
             table_json_obj = table.model_dump()
             table_md = self._table_to_md(table_json_obj)
             table_html = table.export_to_html()
-            
+
             table_data = data['tables'][i]
             table_page_num = table_data['prov'][0]['page_no']
             table_bbox = table_data['prov'][0]['bbox']
             table_bbox = [
                 table_bbox['l'],
-                table_bbox['t'], 
+                table_bbox['t'],
                 table_bbox['r'],
                 table_bbox['b']
             ]
-            
-            # Get rows and columns from the table data structure
+
+
             nrows = table_data['data']['num_rows']
             ncols = table_data['data']['num_cols']
 
@@ -474,13 +474,13 @@ class JsonReportProcessor:
         return assembled_tables
 
     def _table_to_md(self, table):
-        # Extract text from grid cells
+
         table_data = []
         for row in table['data']['grid']:
             table_row = [cell['text'] for cell in row]
             table_data.append(table_row)
-        
-        # Check if the table has headers
+
+
         if len(table_data) > 1 and len(table_data[0]) > 0:
             try:
                 md_table = tabulate(
@@ -491,30 +491,30 @@ class JsonReportProcessor:
                     table_data[1:],
                     headers=table_data[0],
                     tablefmt="github",
-                    disable_numparse=True,# 关闭数字自动解析，避免
+                    disable_numparse=True,
                 )
         else:
             md_table = tabulate(table_data, tablefmt="github")
-        
+
         return md_table
 
     def assemble_pictures(self, data):
         assembled_pictures = []
         for i, picture in enumerate(data['pictures']):
             children_list = self._process_picture_block(picture, data)
-            
+
             ref_num = picture['self_ref'].split('/')[-1]
             ref_num = int(ref_num)
-            
+
             picture_page_num = picture['prov'][0]['page_no']
             picture_bbox = picture['prov'][0]['bbox']
             picture_bbox = [
                 picture_bbox['l'],
-                picture_bbox['t'], 
+                picture_bbox['t'],
                 picture_bbox['r'],
                 picture_bbox['b']
             ]
-            
+
             picture_obj = {
                 'picture_id': ref_num,
                 'page': picture_page_num,
@@ -523,19 +523,19 @@ class JsonReportProcessor:
             }
             assembled_pictures.append(picture_obj)
         return assembled_pictures
-    
+
     def _process_picture_block(self, picture, data):
         children_list = []
-        
+
         for item in picture['children']:
             if isinstance(item, dict) and '$ref' in item:
                 ref = item['$ref']
                 ref_type, ref_num = ref.split('/')[-2:]
                 ref_num = int(ref_num)
-                
+
                 if ref_type == 'texts':
                     content_item = self._process_text_reference(ref_num, data)
-                        
+
                     children_list.append(content_item)
 
         return children_list

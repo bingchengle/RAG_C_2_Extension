@@ -1,0 +1,1522 @@
+{
+  "answers": [
+    {
+      "question_text": "For Ziff Davis, Inc., what was the value of Cloud storage capacity (TB) at the end of the period listed in annual report? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. The question asks for 'Cloud storage capacity (TB)' at the end of the period listed in the annual report. This metric represents the total amount of cloud storage space available or utilized by Ziff Davis, Inc., measured in terabytes (TB). 2. Upon reviewing the provided pages from the annual report, there is no direct mention of 'Cloud storage capacity (TB)' or any related metric that specifies the amount of cloud storage in terabytes. 3. Since there is no direct or indirect mention of cloud storage capacity in terabytes (TB) in the provided context, we cannot find a metric that exactly matches the question's requirement. 4. Given that the context does not provide any information related to cloud storage capacity in terabytes (TB), we must conclude that the data is not available. 5. The conclusion is based on the lack of relevant information in the provided context, leading to the determination that the answer is 'N/A'."
+    },
+    {
+      "question_text": "Did Liberty Broadband Corporation announce a share buyback plan in the annual report? If there is no mention, return False.",
+      "kind": "boolean",
+      "value": true,
+      "references": [
+        {
+          "pdf_sha1": "446545ae548543d8744f8d885ff75face3424ba4",
+          "page_index": 88
+        },
+        {
+          "pdf_sha1": "446545ae548543d8744f8d885ff75face3424ba4",
+          "page_index": 118
+        }
+      ],
+      "reasoning_process": "1. The question asks if Liberty Broadband Corporation announced a share buyback plan in its annual report. A share buyback plan is when a company buys back its own shares from the market. \n2. To answer this, we analyze the provided text from the annual report, focusing on sections discussing financial activities, such as notes to the consolidated financial statements and management's discussion and analysis. \n3. The relevant information is found on page 89, under 'Purchases of Equity Securities by the Issuer,' which mentions the company's share repurchase program, including the amount available for share repurchases as of December 31, 2021. \n4. Further details indicate that the board of directors authorized additional amounts for share repurchases on January 26, 2022, and August 17, 2022, showing an active share buyback plan. \n5. This information directly answers the question, indicating the company did have a share buyback plan and provided details about it in the annual report."
+    },
+    {
+      "question_text": "What is the total number of employees let go by Pintec Technology Holdings Limited according to the annual report? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. The question asks for the 'total number of employees let go' by Pintec Technology Holdings Limited, which refers to the number of employees terminated or laid off. 2. The context does not provide a direct metric or information that matches the question's requirement. 3. There is no explicit information on employee terminations or layoffs in the given text. 4. Without explicit information, there is no value to extract or adjust. 5. The lack of specific information means we cannot confirm a specific number of employees let go."
+    },
+    {
+      "question_text": "Which leadership positions changed at Westwater Resources, Inc. in the reporting period? If data is not available, return 'N/A'. Give me the title of the position.",
+      "kind": "names",
+      "value": [
+        "President and Chief Executive Officer",
+        "Senior Vice President - Finance and Chief Financial Officer",
+        "Chief Administrative Officer"
+      ],
+      "references": [
+        {
+          "pdf_sha1": "92d9de8e4db96e0b95a484afcd1c54c6beb62c03",
+          "page_index": 61
+        },
+        {
+          "pdf_sha1": "92d9de8e4db96e0b95a484afcd1c54c6beb62c03",
+          "page_index": 16
+        }
+      ],
+      "reasoning_process": "1. The question asks for the leadership positions that changed at Westwater Resources, Inc. in the reporting period. \n2. To answer this question, we need to look for information about changes in leadership positions within the provided context. \n3. On page 62, under the section 'Management Changes', it is stated that 'On January 16, 2023, the Board of Directors of Westwater Resources, Inc. appointed Frank Bakker, previously serving as Vice President and General Manager - Alabama Graphite Products, as President and Chief Executive Officer of the Company effective January 16, 2023.' \n4. Additionally, on the same page, it is mentioned that 'In addition, Steven M. Cates, previously serving as the Vice President - Finance and Chief Financial Officer, was appointed Senior Vice President - Finance and Chief Financial Officer of the Company effective January 16, 2023.' \n5. Furthermore, it is also stated that 'Also, John W. Lawrence, the Company's General Counsel and Corporate Secretary, became Chief Administrative Officer, General Counsel and Corporate Secretary effective January 16, 2023.' \n6. Based on this information, we can identify the leadership positions that changed during the reporting period as President and Chief Executive Officer, Senior Vice President - Finance and Chief Financial Officer, and Chief Administrative Officer, General Counsel and Corporate Secretary. \n7. However, the question asks for the title of the position in singular form, so we will return the titles of the positions that changed."
+    },
+    {
+      "question_text": "Did Brave Bison Group plc mention any mergers or acquisitions in the annual report? If there is no mention, return False.",
+      "kind": "boolean",
+      "value": true,
+      "references": [
+        {
+          "pdf_sha1": "ddd10e4612006205c4b1ba050a11648071e6e429",
+          "page_index": 60
+        },
+        {
+          "pdf_sha1": "ddd10e4612006205c4b1ba050a11648071e6e429",
+          "page_index": 10
+        }
+      ],
+      "reasoning_process": "1. The question asks if Brave Bison Group plc mentioned any mergers or acquisitions in their annual report. \\\n                            2. The context provided includes various financial and strategic discussions. \\\n                            3. On page 61, the acquisition of Social Chain Limited is mentioned, and there's also a mention of the acquisition of Best Response Media Limited. \\\n                            4. This indicates that the company did discuss mergers or acquisitions in the report."
+    },
+    {
+      "question_text": "According to the annual report, what is the Cash flow from operations (in USD) for Sonic Automotive, Inc.  (within the last period or at the end of the last period)? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": 406100000,
+      "references": [
+        {
+          "pdf_sha1": "682de8e45fd9688f3452bc0e18257132a8f3cff6",
+          "page_index": 91
+        },
+        {
+          "pdf_sha1": "682de8e45fd9688f3452bc0e18257132a8f3cff6",
+          "page_index": 71
+        }
+      ],
+      "reasoning_process": "1. **Metric Definition:** The question asks for 'Cash flow from operations' for Sonic Automotive, Inc. This metric represents the net amount of cash provided by or used in the company's operating activities during a specific period. 2. **Context Examination:** The context includes 'CONSOLIDATED STATEMENTS OF CASH FLOWS' (page 92), a standard financial statement that reports a company's cash flows from operating, investing, and financing activities. 3. **Metric Matching:** On page 92, under 'CASH FLOWS FROM OPERATING ACTIVITIES,' a line item labeled 'Net cash provided by operating activities' exists. This directly matches the concept requested in the question. 4. **Value Extraction and Adjustment:** The value for 'Net cash provided by operating activities' is '$406.1 million.' The context indicates this is in millions of dollars. Therefore, the full value is 406,100,000. 5. **Confirmation**: No calculation beyond unit adjustment was needed. The reported metric directly matches the question."
+    },
+    {
+      "question_text": "Did Poste Italiane announce any changes to its dividend policy in the annual report? If there is no mention, return False.",
+      "kind": "boolean",
+      "value": false,
+      "references": [
+        {
+          "pdf_sha1": "c74139ce26a6f803725f5074a8a0f539abb99c09",
+          "page_index": 34
+        },
+        {
+          "pdf_sha1": "c74139ce26a6f803725f5074a8a0f539abb99c09",
+          "page_index": 191
+        }
+      ],
+      "reasoning_process": "1. The question asks if Poste Italiane announced any changes to its dividend policy in the annual report, requiring an understanding of what constitutes a change in dividend policy. \n2. To answer this, we must analyze the context from the annual report, focusing on sections that discuss dividends or dividend policies, such as financial statements and reports on operations. \n3. The context includes discussions on page 192 about the company's dividend policy and the decision to bring forward part of the ordinary dividend for 2022 as an interim dividend, which shows an action taken regarding dividends but does not necessarily indicate a change in the dividend policy itself. \n4. Page 35 mentions the company's strategy and financial results, including the payment of dividends, noting an increase in the dividend per share but not explicitly mentioning a change in the dividend policy. \n5. Other pages discuss financial performance, sustainability, and governance but do not directly address changes to the dividend policy. \nThe actions described, such as paying an interim dividend and increasing the dividend per share, can be seen as implementations of the existing policy rather than changes to it, as they do not explicitly alter the guidelines or rules that the company follows in deciding the amount of dividends to be paid."
+    },
+    {
+      "question_text": "What was the largest single spending of MGM Resorts International on executive compensation in USD? If data is not available in this currency, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. **Metric Definition:** The question asks for the largest single spending on executive compensation by MGM Resorts International in USD. This means we are looking for a specific financial figure related to how much the company spent on compensating its executives. 2. **Context Examination:** The provided context includes various financial and operational details about MGM Resorts International, including its properties, operations, and some financial transactions. However, to find the largest single spending on executive compensation, we need to focus on sections that discuss executive compensation or similar financial expenditures. 3. **Metric Matching:** Upon reviewing the context, there isn't a direct mention of the 'largest single spending on executive compensation' in the provided pages. However, we can look for sections that discuss executive compensation or similar financial expenditures to see if any relevant information can be inferred. 4. **Value Extraction and Adjustment:** Given the lack of direct information on the largest single spending on executive compensation, we cannot extract a specific value from the provided context. The context does discuss various financial figures and transactions but does not explicitly mention executive compensation in a way that allows us to identify the largest single spending. 5. **Confirmation:** Since the provided context does not contain explicit information on the largest single spending on executive compensation, we cannot confirm a specific value for this metric."
+    },
+    {
+      "question_text": "What was the Gross margin (%) for INMUNE BIO INC. according to the annual report (within the last period or at the end of the last period)? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. **Metric Definition:** The question asks for 'Gross margin (%)' for INMUNE BIO INC. according to the annual report. Gross margin percentage represents the percentage of revenue that a company retains after deducting the cost of goods sold (COGS) from revenue. It is calculated as (Revenue - COGS) / Revenue * 100. 2. **Context Examination:** The provided text does not explicitly mention 'Gross margin' or its direct calculation components (Revenue and COGS). 3. **Metric Matching:** Since 'Gross margin' or its calculation components are not directly mentioned, we cannot find an exact match for the metric in question within the provided context. 4. **Value Extraction and Adjustment:** Given the lack of direct mention of 'Gross margin' or its components, we cannot extract or adjust any values. 5. **Confirmation**: The data required to calculate or directly state the gross margin percentage is not available in the provided context, leading to the conclusion that the answer is 'N/A'."
+    },
+    {
+      "question_text": "Did BetMakers Technology Group Ltd mention any mergers or acquisitions in the annual report? If there is no mention, return False.",
+      "kind": "boolean",
+      "value": true,
+      "references": [
+        {
+          "pdf_sha1": "1af8f906e34af6e0acfe4f73e37093bbe34700f3",
+          "page_index": 11
+        },
+        {
+          "pdf_sha1": "1af8f906e34af6e0acfe4f73e37093bbe34700f3",
+          "page_index": 67
+        },
+        {
+          "pdf_sha1": "1af8f906e34af6e0acfe4f73e37093bbe34700f3",
+          "page_index": 9
+        }
+      ],
+      "reasoning_process": "1. The question asks whether BetMakers Technology Group Ltd mentioned any mergers or acquisitions in the annual report. To answer this, we need to look for any mentions of mergers or acquisitions in the provided text. \n2. Upon reviewing the text, we find that on page 12, the Directors' report mentions the acquisition of the racing and digital assets from Sportech PLC, which was completed on 16 June 2021. \n3. Additionally, on page 68, Note 29 of the financial statements discusses the accounting policy for business combinations, which includes the acquisition of Sportech PLC's assets. \n4. Furthermore, on page 10, the Directors' report mentions the acquisition of certain assets pertaining to the wagering business owned and operated by O'Shea Bookmaking Pty Ltd (trading as 'TexBet') by NTD Pty Limited, with BetMakers' support. \n5. Based on this information, it is clear that BetMakers Technology Group Ltd did mention mergers or acquisitions in the annual report."
+    },
+    {
+      "question_text": "For Franklin Covey Co., what was the value of Year-end box office market share (if applicable) at the end of the period listed in annual report? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. **Metric Definition:** The question asks for 'Year-end box office market share' for Franklin Covey Co. This metric represents the percentage of total box office revenue that a company's films have earned at the end of a given period. \n2. **Context Examination:** The provided context includes various sections from Franklin Covey Co.'s annual report, such as business descriptions, financial highlights, and notes to consolidated financial statements. However, none of these sections directly relate to box office market share, as Franklin Covey Co. is not a film production or distribution company. \n3. **Metric Matching:** Since Franklin Covey Co. operates in the organizational performance improvement and training industry, not in the film industry, the concept of 'Year-end box office market share' does not apply to this company. \n4. **Data Availability:** The context does not provide any data related to box office market share because it is not relevant to Franklin Covey Co.'s business. \n5. **Conclusion:** Given that the metric is not applicable to Franklin Covey Co.'s industry and no relevant data is provided, the answer is 'N/A'."
+    },
+    {
+      "question_text": "Did Downer EDI Limited announce a share buyback plan in the annual report? If there is no mention, return False.",
+      "kind": "boolean",
+      "value": true,
+      "references": [
+        {
+          "pdf_sha1": "0a61a353b1ea9fd9b8f63b60239634ca3007d58f",
+          "page_index": 117
+        },
+        {
+          "pdf_sha1": "0a61a353b1ea9fd9b8f63b60239634ca3007d58f",
+          "page_index": 13
+        }
+      ],
+      "reasoning_process": "The question asks if Downer EDI Limited announced a share buyback plan in the annual report. Pages 118 and 14 mention a buyback of Downer's shares, indicating the company was involved in a share buyback program. However, the question's intent seems to be about the announcement of a new plan. Since the provided context does not explicitly differentiate between an ongoing program and a new announcement, we consider the presence of a share buyback program as relevant information."
+    },
+    {
+      "question_text": "What was the Gross margin (%) for Armadale Capital Plc according to the annual report (within the last period or at the end of the last period)? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. **Metric Definition:** The question asks for the 'Gross margin (%)' for Armadale Capital Plc. 'Gross margin (%)' represents the percentage of revenue that is gross profit, calculated as (Revenue - Cost of Goods Sold) / Revenue * 100. \n2. **Context Examination:** The provided context includes various financial statements and reports, such as the Consolidated Statement of Comprehensive Income, Strategic Report, and Directors' Report. However, none of these reports directly mention 'Gross margin (%)' or provide the necessary components (Revenue and Cost of Goods Sold) to calculate it. \n3. **Metric Matching:** Upon reviewing the context, there is no line item or section that directly matches the concept of 'Gross margin (%)' as defined. The context does provide information on revenues and expenses but does not explicitly state the Cost of Goods Sold, which is crucial for calculating the Gross margin. \n4. **Value Extraction and Adjustment:** Since the context lacks the specific data required to calculate the Gross margin (%), such as the Cost of Goods Sold, and given that the question asks for a direct metric which is not provided, we cannot perform the necessary calculation to derive the Gross margin (%). \n5. **Confirmation:** Given the information available, it's clear that the context does not provide the Gross margin (%) or the necessary components to calculate it accurately. Thus, the answer must reflect the unavailability of this specific metric in the provided context."
+    },
+    {
+      "question_text": "Did AA Limited announce any new product launches in the annual report? If there is no mention, return False.",
+      "kind": "boolean",
+      "value": false,
+      "references": [
+        {
+          "pdf_sha1": "aa781901e117281bfee6f8e4bea6fc9c9bada62e",
+          "page_index": 12
+        },
+        {
+          "pdf_sha1": "aa781901e117281bfee6f8e4bea6fc9c9bada62e",
+          "page_index": 19
+        },
+        {
+          "pdf_sha1": "aa781901e117281bfee6f8e4bea6fc9c9bada62e",
+          "page_index": 42
+        }
+      ],
+      "reasoning_process": "1. The question asks if AA Limited announced any new product launches in the annual report. This requires us to look for any mentions of new products or services introduced by the company. 2. The text covers various aspects of the company's performance, including financial reports, strategic reviews, and operational updates. We need to scan through the sections that might mention new product launches, such as the Strategic Report or sections discussing business developments and innovations. 3. Pages like 13, 20, and 43 discuss the company's financial review, customer service, operations, and developing businesses. These sections might contain information about new initiatives or product launches. 4. Upon reviewing the relevant sections, we find mentions of enhancements to existing services and investments in digital platforms. For example, page 13 mentions the enhancement of the digital platform for SMEs and the expansion of SME trade partnerships. However, there is no explicit mention of new product launches. 5. Based on the information provided in the annual report, there is no clear announcement of new product launches. While the company discusses improvements and expansions of existing services, there is no specific mention of introducing entirely new products. 6. Given the lack of explicit information about new product launches in the provided text, the answer to the question is False."
+    },
+    {
+      "question_text": "Did Franklin Covey Co. outline any new ESG initiatives in the annual report? If there is no mention, return False.",
+      "kind": "boolean",
+      "value": true,
+      "references": [
+        {
+          "pdf_sha1": "e30ece688caf7602b734bbbcf39559b4acdb2739",
+          "page_index": 14
+        },
+        {
+          "pdf_sha1": "e30ece688caf7602b734bbbcf39559b4acdb2739",
+          "page_index": 29
+        }
+      ],
+      "reasoning_process": "1. The question asks if Franklin Covey Co. outlined any new ESG initiatives in their annual report. 2. Relevant information is found in sections discussing corporate social responsibility and sustainability. 3. Pages 15 and 30 provide details on ESG efforts, including diversity, equity, and inclusion, environmental sustainability, and community support. 4. The company mentions specific actions like the International Day of Service, indicating ongoing ESG efforts. 5. Conclusion: Franklin Covey Co. does discuss ESG initiatives, including new or continued efforts."
+    },
+    {
+      "question_text": "What was the largest single spending of Ocugen, Inc. on executive compensation in AUD? If data is not available in this currency, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. **Metric Definition:** The question asks for the 'largest single spending of Ocugen, Inc. on executive compensation' in AUD (Australian Dollars). This means we are looking for the highest amount spent by Ocugen, Inc. on compensating its executives, specifically in the currency of Australian Dollars. 2. **Context Examination:** The context includes various financial statements and discussions about Ocugen, Inc.'s operations, including expenses, revenues, and compensation for executives. However, the context does not directly mention Australian Dollars (AUD) as the currency for any of the financial figures provided. 3. **Metric Matching:** Since the question specifically asks for the amount in AUD and the provided context does not mention AUD, we cannot directly find the answer from the given information. All financial figures in the context are mentioned in thousands of USD (United States Dollars), not AUD. 4. **Value Extraction and Adjustment:** Given that the context does not provide any information in AUD and does not offer a direct conversion rate to AUD, we cannot accurately calculate or derive the largest single spending on executive compensation in AUD from the provided information. 5. **Confirmation**: We should not guess or infer the answer based on the information provided in a different currency. The question specifically asks for the amount in AUD, and without explicit information or a conversion rate, we cannot accurately provide the answer."
+    },
+    {
+      "question_text": "Did Bionano Genomics, Inc. mention any mergers or acquisitions in the annual report? If there is no mention, return False.",
+      "kind": "boolean",
+      "value": true,
+      "references": [
+        {
+          "pdf_sha1": "5a24fa827d172a7669eca206b2a5f47c2b19b48d",
+          "page_index": 26
+        },
+        {
+          "pdf_sha1": "5a24fa827d172a7669eca206b2a5f47c2b19b48d",
+          "page_index": 3
+        }
+      ],
+      "reasoning_process": "1. The question asks if Bionano Genomics, Inc. mentioned any mergers or acquisitions in their annual report. \n2. We need to identify keywords related to mergers and acquisitions in the text, such as 'merger,' 'acquisition,' 'merge,' 'acquired,' etc. \n3. Upon reviewing the text, we find explicit mentions of acquisitions, such as 'through the acquisition of Lineagen,' 'through the acquisition of BioDiscovery,' and 'through the acquisition of Purigen' on page 27. \n4. These mentions clearly indicate that Bionano Genomics, Inc. did discuss acquisitions in their annual report. \n5. Therefore, the answer to the question is affirmative, indicating that mergers or acquisitions were mentioned."
+    },
+    {
+      "question_text": "Did Seiko Epson Corporation announce any changes to its dividend policy in the annual report? If there is no mention, return False.",
+      "kind": "boolean",
+      "value": false,
+      "references": [
+        {
+          "pdf_sha1": "6d76ccb75bbf1b27ca60b8419c5343ac050cebb0",
+          "page_index": 66
+        },
+        {
+          "pdf_sha1": "6d76ccb75bbf1b27ca60b8419c5343ac050cebb0",
+          "page_index": 150
+        }
+      ],
+      "reasoning_process": "1. The question asks whether Seiko Epson Corporation announced changes to its dividend policy in the annual report. This requires identifying any statements that indicate a modification or update to how the company decides to distribute dividends. 2. The relevant sections for this information include discussions on financial performance, shareholder information, and corporate governance, particularly sections titled 'Dividend policy' and 'Distribution of retained earnings.' 3. On page 67, the report outlines the company's dividend policy, including a target payout ratio and intentions for returning profits to shareholders. 4. To determine if changes were made, we look for explicit statements mentioning updates or revisions to the policy. 5. A review of the entire report is necessary to catch any indirect references to policy changes. 6. After this review, no explicit mention of changes to the dividend policy is found. The report discusses the current policy but does not indicate any revisions."
+    },
+    {
+      "question_text": "What was the value of Number of hotels at year-end of MGM Resorts International at the end of the period listed in annual report? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": 19,
+      "references": [
+        {
+          "pdf_sha1": "e117005fc313bf0d49429d34bc8e1ef64de54898",
+          "page_index": 6
+        }
+      ],
+      "reasoning_process": "1. **Metric Definition:** The question asks for the 'Number of hotels (resorts)' at the year-end of MGM Resorts International. This metric represents the total count of hotels or resorts owned or operated by the company at the end of the reporting period. \n2. **Context Examination:** The context provided includes information about MGM Resorts International's business operations, including its properties and developments. On page 7, the context mentions that 'As of December 31, 2022, we operate 17 domestic casino resorts and, through our 56% controlling interest in MGM China Holdings Limited, operate two casino resorts in Macau.' \n3. **Metric Matching:** The information on page 7 directly matches the concept requested in the question, which is the number of hotels (resorts) at the year-end. The context explicitly states the number of domestic and international resorts operated by MGM Resorts International. \n4. **Value Extraction:** From the context, we can extract that MGM Resorts International operates a total of 17 domestic casino resorts plus 2 international casino resorts in Macau, giving a total of 19 resorts. \n5. **Confirmation:** The information provided in the context directly answers the question without requiring any calculations or inferences beyond simple addition of the domestic and international resorts mentioned."
+    },
+    {
+      "question_text": "What is the total number of employees let go by NZME Limited according to the annual report? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. **Metric Definition:** The question asks for the 'total number of employees let go' by NZME Limited. This refers to the number of employees who were terminated, made redundant, or otherwise left the company due to company-initiated actions, as opposed to voluntary resignations or retirements. \n2. **Context Examination:** The provided context includes various pages from the annual report, discussing employee remuneration, diversity, and inclusion, as well as the company's strategic priorities and financial results. However, there is no explicit mention of employees being 'let go' in the traditional sense of layoffs or redundancies. \n3. **Metric Matching:** Upon reviewing the context, there is no direct metric or information that matches the concept of 'total number of employees let go.' The closest related information is about employee numbers, diversity, and remuneration, but not about terminations or redundancies. \n4. **Value Extraction and Adjustment:** Since there is no information provided in the context about the number of employees let go, there is no value to extract or adjust. \n5. **Conclusion:** Given the lack of relevant information, the answer to the question about the total number of employees let go by NZME Limited is 'N/A'."
+    },
+    {
+      "question_text": "For Incyte Corporation, what was the value of Clinical trial sites operating at year-end at the end of the period listed in annual report? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. **Metric Definition:** The question asks for 'Clinical trial sites operating at year-end' for Incyte Corporation. This metric represents the number or value of clinical trial sites that were operational at the end of the reporting period. 2. **Context Examination:** We need to look through the provided pages to find any information related to clinical trial sites. This could be in the form of a specific number, a description of operations, or financial data related to clinical trials. 3. **Metric Matching:** Upon reviewing the provided text, there is no direct mention of 'Clinical trial sites operating at year-end' or any similar metric that directly corresponds to the question asked. 4. **Value Extraction and Adjustment:** Given that there is no explicit information on clinical trial sites operating at year-end, we cannot directly answer the question from the provided context. The information given does not allow for a straightforward calculation or derivation of the requested metric without making assumptions or inferences. 5. **Confirmation**: Since there is no clear or direct information provided in the context that matches the question's metric, and given the instruction to avoid guesswork or inference, the appropriate response is 'N/A'."
+    },
+    {
+      "question_text": "For Aurora Innovation, Inc., what was the value of Number of patents at year-end at the end of the period listed in annual report? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. **Metric Definition:** The question asks for the 'Number of patents at year-end' for 'Aurora Innovation, Inc.' This metric represents the total count of patents owned or applied for by the company at the end of the reporting period. \n2. **Context Examination:** The provided context includes various financial statements and notes from the annual report, such as the Consolidated Balance Sheets, Consolidated Statements of Operations, and Notes to the Consolidated Financial Statements. However, none of these directly mention 'Number of patents at year-end.' \n3. **Metric Matching:** Upon reviewing the context, there is no line item or mention of 'Number of patents at year-end' or any similar metric that directly matches the concept requested in the question. \n4. **Value Extraction and Adjustment:** Since the context does not provide a direct value for 'Number of patents at year-end,' there is no value to extract or adjust. \n5. **Conclusion:** Given that the metric 'Number of patents at year-end' is not mentioned or implied in the provided context, the answer must be 'N/A' as per the instructions for handling unavailable data."
+    },
+    {
+      "question_text": "Which of the companies had the lowest total assets in EUR at the end of the period listed in annual report: \"Datalogic\", \"Terns Pharmaceuticals, Inc.\", \"Incyte Corporation\", \"INMUNE BIO INC.\", \"Duni Group\"? If data for the company is not available, exclude it from the comparison. If only one company is left, return this company.",
+      "kind": "name",
+      "value": "Datalogic",
+      "references": [
+        {
+          "pdf_sha1": "980742aa08ea64d552c153bcefbd7e8243fb9efd",
+          "page_index": 110
+        },
+        {
+          "pdf_sha1": "980742aa08ea64d552c153bcefbd7e8243fb9efd",
+          "page_index": 33
+        },
+        {
+          "pdf_sha1": "553afbf09b6d83166b17acb02431c6cf38e4defc",
+          "page_index": 47
+        },
+        {
+          "pdf_sha1": "553afbf09b6d83166b17acb02431c6cf38e4defc",
+          "page_index": 44
+        },
+        {
+          "pdf_sha1": "e7a45fed0d7ebfd13a524e7fcc443318bac654e2",
+          "page_index": 100
+        },
+        {
+          "pdf_sha1": "e7a45fed0d7ebfd13a524e7fcc443318bac654e2",
+          "page_index": 70
+        },
+        {
+          "pdf_sha1": "4d3e52b69b4b5366e54ce87cf641b01b1419bdee",
+          "page_index": 83
+        },
+        {
+          "pdf_sha1": "4d3e52b69b4b5366e54ce87cf641b01b1419bdee",
+          "page_index": 86
+        },
+        {
+          "pdf_sha1": "79ffb9b8682aa565172233c070a47d944464644c",
+          "page_index": 136
+        },
+        {
+          "pdf_sha1": "79ffb9b8682aa565172233c070a47d944464644c",
+          "page_index": 151
+        }
+      ],
+      "reasoning_process": "1. The question asks for the company with the lowest total assets in EUR. \n2. Gather the total assets in EUR for each company from the individual answers: Datalogic: 845,511 EUR; Terns Pharmaceuticals, Inc.: N/A; Incyte Corporation: N/A; INMUNE BIO INC.: N/A; Duni Group: N/A. \n3. Terns Pharmaceuticals, Inc., Incyte Corporation, INMUNE BIO INC., and Duni Group are excluded because their assets are not reported in EUR or cannot be directly converted to EUR. \n4. Only Datalogic has its total assets reported in EUR. \n5. Therefore, Datalogic is the company with the lowest total assets in EUR by default."
+    },
+    {
+      "question_text": "What is the total number of employees let go by Downer EDI Limited according to the annual report? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. **Metric Definition:** The question asks for the 'total number of employees let go' by Downer EDI Limited. This metric represents the total count of employees who have left the company, which could be due to various reasons such as layoffs, resignations, or retirements. \n2. **Context Examination:** The provided context includes various pages from the annual report, discussing different aspects of the company's performance, such as financial highlights, safety performance, and sustainability. However, there is no direct mention of the 'total number of employees let go'. \n3. **Metric Matching:** Upon examining the context, it appears that the metric 'total number of employees let go' is not explicitly mentioned. While there are discussions on employee benefits, remuneration, and safety performance, there is no specific data or information provided on the total number of employees who have left the company. \n4. **Value Extraction and Adjustment:** Since the context does not provide a direct value for the 'total number of employees let go', it is not possible to extract or adjust any value to answer the question. \n5. **Confirmation:** Given the lack of explicit information on the 'total number of employees let go', it is confirmed that the data is not available in the provided context."
+    },
+    {
+      "question_text": "Which of the companies had the lowest total revenue in EUR at the end of the period listed in annual report: \"Atreca, Inc.\", \"Poste Italiane\", \"Datalogic\", \"NuCana plc\", \"RWE AG\"? If data for the company is not available, exclude it from the comparison. If only one company is left, return this company.",
+      "kind": "name",
+      "value": "Datalogic",
+      "references": [
+        {
+          "pdf_sha1": "980742aa08ea64d552c153bcefbd7e8243fb9efd",
+          "page_index": 138
+        },
+        {
+          "pdf_sha1": "980742aa08ea64d552c153bcefbd7e8243fb9efd",
+          "page_index": 45
+        },
+        {
+          "pdf_sha1": "5f226fe96206888930e3baaf0bff70d4b0a1db40",
+          "page_index": 82
+        },
+        {
+          "pdf_sha1": "5f226fe96206888930e3baaf0bff70d4b0a1db40",
+          "page_index": 81
+        },
+        {
+          "pdf_sha1": "5f226fe96206888930e3baaf0bff70d4b0a1db40",
+          "page_index": 85
+        },
+        {
+          "pdf_sha1": "9b7fdb871fc4d4a8babc25448257ae0b81a6442d",
+          "page_index": 165
+        },
+        {
+          "pdf_sha1": "9b7fdb871fc4d4a8babc25448257ae0b81a6442d",
+          "page_index": 166
+        },
+        {
+          "pdf_sha1": "cc0fc5888b99758100a7ff024863fc4337b6b3c5",
+          "page_index": 49
+        },
+        {
+          "pdf_sha1": "cc0fc5888b99758100a7ff024863fc4337b6b3c5",
+          "page_index": 60
+        },
+        {
+          "pdf_sha1": "c74139ce26a6f803725f5074a8a0f539abb99c09",
+          "page_index": 195
+        },
+        {
+          "pdf_sha1": "c74139ce26a6f803725f5074a8a0f539abb99c09",
+          "page_index": 243
+        }
+      ],
+      "reasoning_process": "1. The question asks for the company with the lowest total revenue in EUR. \n2. Gather the total revenue in EUR for each company from the individual answers: Poste Italiane: €11,900,000,000; Datalogic: €654,632,000; RWE AG: €38,569,000,000. \n3. Atreca, Inc. and NuCana plc are excluded because their financial statements are not in EUR. \n4. Compare the total revenues: Datalogic (€654,632,000) < Poste Italiane (€11,900,000,000) < RWE AG (€38,569,000,000). \n5. Therefore, Datalogic has the lowest total revenue in EUR."
+    },
+    {
+      "question_text": "What was the value of Total power generation capacity (MW) of Elixir Energy Limited at the end of the period listed in annual report? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. **Metric Definition:** The question asks for the 'Total power generation capacity (MW)' of Elixir Energy Limited at the end of the period listed in the annual report. This metric represents the total capacity of power generation facilities owned or operated by the company, measured in megawatts (MW). 2. **Context Examination:** The provided context includes various pages from the annual report, discussing the company's operations, financials, and projects. However, none of the pages directly mention 'Total power generation capacity (MW)'. 3. **Metric Matching:** Upon reviewing the context, there is no direct mention of the 'Total power generation capacity (MW)' or any equivalent metric that matches the concept requested in the question. 4. **Value Extraction and Adjustment:** Since there is no direct or indirect mention of the 'Total power generation capacity (MW)' in the provided context, there is no value to extract or adjust. 5. **Confirmation:** Given the lack of information regarding the 'Total power generation capacity (MW)' in the context, the answer must reflect the absence of this specific metric."
+    },
+    {
+      "question_text": "What was the value of Number of active pharmaceutical patents of Kiniksa Pharmaceuticals, Ltd. at the end of the period listed in annual report? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. **Metric Definition:** The question asks for 'Number of active pharmaceutical patents' of Kiniksa Pharmaceuticals, Ltd. at the end of the period listed in the annual report. This metric represents the count of patents that are currently active and owned or licensed by the company, specifically related to pharmaceuticals. 2. **Context Examination:** The provided context includes various financial statements and notes, but none directly mention 'Number of active pharmaceutical patents.' 3. **Metric Matching:** There is no direct or indirect mention of the number of active pharmaceutical patents in the context. 4. **Value Extraction and Adjustment:** Given the lack of direct information, no value can be extracted or adjusted. 5. **Confirmation:** The context does not provide the necessary information to determine the number of active pharmaceutical patents without making assumptions or inferences, leading to the conclusion that the answer is 'N/A'."
+    },
+    {
+      "question_text": "What was the value of Total deposits at year-end of CoreCard Corporation at the end of the period listed in annual report? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. **Metric Definition:** The question asks for 'Total deposits' at the year-end of CoreCard Corporation. This refers to the total amount of money deposited by customers into their accounts with the company at the end of the reporting period. \\\n2. **Context Examination:** The provided context includes financial statements and discussions about CoreCard Corporation's operations and financial performance. However, 'Total deposits' is not a standard line item in these statements. \\\n3. **Metric Matching:** There isn't a direct mention of 'Total deposits' in the context. The balance sheets list various assets and liabilities but do not explicitly mention 'Total deposits'. \\\n4. **Value Extraction and Adjustment:** Since 'Total deposits' is not mentioned, there is no value to extract or adjust. \\\n5. **Confirmation:** Given that 'Total deposits' is not directly mentioned or implied, and considering the question specifically asks for this metric, the answer must reflect the absence of this information."
+    },
+    {
+      "question_text": "For HCA Healthcare, Inc., what was the value of Outstanding insurance claims (if applicable) at the end of the period listed in annual report? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. **Metric Definition:** The question asks for 'Outstanding insurance claims' for 'HCA Healthcare, Inc.' at the end of the period. 'Outstanding insurance claims' refers to the amount of claims that have been filed but not yet paid or resolved by the insurance company. \n2. **Context Examination:** The context includes information about HCA Healthcare, Inc.'s financial statements and notes. We need to examine the notes to find information related to insurance claims. \n3. **Metric Matching:** On page 67, under 'Professional Liability Claims', there is information about provisions for losses related to professional liability risks and reserves for professional liability risks. However, the term 'Outstanding insurance claims' is not explicitly mentioned. \n4. **Value Extraction and Adjustment:** The context does not provide a direct value for 'Outstanding insurance claims'. Although there are mentions of 'reserves for professional liability risks' and 'provisions for losses related to professional liability risks', these are not the same as outstanding insurance claims. \n5. **Confirmation**: Since the context does not provide a direct value for 'Outstanding insurance claims' and the available information does not exactly match the requested metric, the answer is 'N/A'."
+    },
+    {
+      "question_text": "Which leadership positions changed at Datalogic in the reporting period? If data is not available, return 'N/A'. Give me the title of the position.",
+      "kind": "names",
+      "value": [
+        "Director",
+        "Chairman of the Board of Statutory Auditors",
+        "Board of Statutory Auditors"
+      ],
+      "references": [
+        {
+          "pdf_sha1": "980742aa08ea64d552c153bcefbd7e8243fb9efd",
+          "page_index": 67
+        },
+        {
+          "pdf_sha1": "980742aa08ea64d552c153bcefbd7e8243fb9efd",
+          "page_index": 147
+        }
+      ],
+      "reasoning_process": "1. The question asks for the leadership positions that changed at Datalogic in the reporting period. \n2. To answer this question, we need to look for information about changes in leadership positions, such as appointments or departures of executives, in the provided context. \n3. On page 68, it is mentioned that the Shareholders' Meeting approved the distribution of an ordinary unit dividend and also resolved to confirm Maria Grazia Filippini as a Director of the Company and appoint a new director, Pietro Todescato. \n4. Additionally, the meeting appointed the Board of Statutory Auditors and the Chairman of the Board of Statutory Auditors. \n5. Based on this information, we can identify the leadership positions that changed during the reporting period. \n6. The positions that changed are: Director of the Company and Board of Statutory Auditors, including the Chairman of the Board of Statutory Auditors. \n7. We should extract the titles of these positions as they appear in the context."
+    },
+    {
+      "question_text": "Did Incitec Pivot Limited mention any mergers or acquisitions in the annual report? If there is no mention, return False.",
+      "kind": "boolean",
+      "value": true,
+      "references": [
+        {
+          "pdf_sha1": "6529fba868216a923407fb0d4e15a811a8e89ebc",
+          "page_index": 108
+        },
+        {
+          "pdf_sha1": "6529fba868216a923407fb0d4e15a811a8e89ebc",
+          "page_index": 57
+        }
+      ],
+      "reasoning_process": "1. The question asks if Incitec Pivot Limited mentioned any mergers or acquisitions in their annual report. If there's no mention, the answer should be False. 2. The context provided includes various pages from the annual report, detailing different aspects of the company's financial and operational performance. To find information about mergers or acquisitions, we should look for sections that typically discuss such activities, such as business combinations, investments, or significant transactions. 3. Upon reviewing the context, page 109 stands out as it discusses 'Business combinations' under the section 'Notes to the Consolidated Financial Statements: Capital Investment'. This section is likely to contain information about mergers or acquisitions. 4. On page 109, there are mentions of specific acquisitions: the acquisition of a majority stake in Australian Bio Fert Pty Ltd, the acquisition of 100% of the equity of Explinvest, the holding company of the Titanobel Group (Titanobel), and the purchase of the Yara Nipro liquid fertiliser business in Australia through the acquisition of 100% of the shares in Yara Nipro Pty Ltd (Nipro). 5. Given the information found on page 109, it is clear that Incitec Pivot Limited did mention mergers or acquisitions in their annual report. Specifically, they discussed the acquisitions of Australian Bio Fert Pty Ltd, Titanobel, and Yara Nipro."
+    },
+    {
+      "question_text": "For Franklin Covey Co., what was the value of Number of active licensing deals at the end of the period listed in annual report? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. **Metric Definition:** The question asks for 'Number of active licensing deals' at the end of the period. This metric represents the count of licensing agreements that are currently in effect and have not expired or been terminated as of the reporting date. 2. **Context Examination:** The provided context includes various financial and operational details about Franklin Covey Co., but it does not explicitly mention 'Number of active licensing deals.' 3. **Metric Matching:** Upon reviewing the context, there is no direct mention of the 'Number of active licensing deals.' While the company discusses its licensing agreements and partnerships, it does not provide a specific count of active deals. 4. **Value Extraction and Adjustment:** Given that the context does not provide a direct count or any information that could be used to calculate the 'Number of active licensing deals' without making assumptions, we must reject the possibility of deriving a numerical answer from the provided information. 5. **Confirmation**: Since there is no explicit information about the 'Number of active licensing deals' and no clear way to derive this number from the given context without speculation, we cannot provide a numerical answer."
+    },
+    {
+      "question_text": "According to the annual report, what is the Cash flow from operations (in USD) for Wheeler Real Estate Investment Trust, Inc.  (within the last period or at the end of the last period)? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": 30758000,
+      "references": [
+        {
+          "pdf_sha1": "b947c33b370d8a3251ef9c36ce7d71e8d16f4f8e",
+          "page_index": 39
+        },
+        {
+          "pdf_sha1": "b947c33b370d8a3251ef9c36ce7d71e8d16f4f8e",
+          "page_index": 37
+        }
+      ],
+      "reasoning_process": "1. **Metric Definition:** The question asks for 'Cash flow from operations' for Wheeler Real Estate Investment Trust, Inc. This metric represents the amount of cash generated by a company's operations within a specific period. \n2. **Context Examination:** The context includes 'Consolidated Statements of Cash Flows' (page 40), a standard financial statement that reports a company's cash inflows and outflows. \n3. **Metric Matching:** On page 40, under 'CASH FLOWS FROM OPERATING ACTIVITIES', a line item labeled 'Net cash provided by operating activities' exists. This directly matches the concept requested in the question. \n4. **Value Extraction and Adjustment:** The value for 'Net cash provided by operating activities' is '$30,758'. The context indicates this is in thousands of dollars. Therefore, the full value is 30,758,000. \n5. **Confirmation**: No calculation beyond unit adjustment was needed. The reported metric directly matches the question."
+    },
+    {
+      "question_text": "Did Incitec Pivot Limited announce any changes to its dividend policy in the annual report? If there is no mention, return False.",
+      "kind": "boolean",
+      "value": false,
+      "references": [
+        {
+          "pdf_sha1": "6529fba868216a923407fb0d4e15a811a8e89ebc",
+          "page_index": 96
+        },
+        {
+          "pdf_sha1": "6529fba868216a923407fb0d4e15a811a8e89ebc",
+          "page_index": 97
+        }
+      ],
+      "reasoning_process": "1. The question asks whether Incitec Pivot Limited announced changes to its dividend policy in the annual report. 2. The provided text includes various sections from the annual report, such as notes to the consolidated financial statements and capital structure. 3. The section on '6. Dividends' discusses dividends paid or declared but does not mention a change in dividend policy. 4. The section on '7. Capital management' mentions strategies for maintaining an optimal capital structure, including dividend payments, but does not indicate a policy change. 5. There is no explicit mention of changes to the dividend policy in the provided text."
+    },
+    {
+      "question_text": "What was the largest single spending of archTIS Limited on executive compensation in USD? If data is not available in this currency, return 'N/A'.",
+      "kind": "number",
+      "value": 250000,
+      "references": [
+        {
+          "pdf_sha1": "c06d5ad4b6408fec26675d30b37a6042c007095a",
+          "page_index": 25
+        },
+        {
+          "pdf_sha1": "c06d5ad4b6408fec26675d30b37a6042c007095a",
+          "page_index": 24
+        }
+      ],
+      "reasoning_process": "1. The question asks for the 'largest single spending of archTIS Limited on executive compensation in USD.' This requires identifying a significant expenditure related to executive pay, specifically in US dollars. \n2. The context provides financial information, mostly in AUD, with some USD mentions. \n3. On page 26, Kurt Mueffelmann's remuneration is $250,000 per year in USD, plus a 20% annual cash bonus and long-term equity incentives. \n4. The $250,000 is the most direct USD value for executive compensation. \n5. Other compensation elements either require calculation or are not in USD."
+    },
+    {
+      "question_text": "Did Guaranty Bancshares, Inc. announce any new product launches in the annual report? If there is no mention, return False.",
+      "kind": "boolean",
+      "value": false,
+      "references": [
+        {
+          "pdf_sha1": "4e3efdc544140b872a59e124443a64c34f356911",
+          "page_index": 9
+        },
+        {
+          "pdf_sha1": "4e3efdc544140b872a59e124443a64c34f356911",
+          "page_index": 2
+        }
+      ],
+      "reasoning_process": "1. Understand the question: The question asks for any announcement of new product launches by Guaranty Bancshares, Inc. in their annual report. 2. Analyze the context: Review the provided pages to identify any mention of new product launches. 3. Identify relevant information: Note the mention of technological integrations but no explicit new product launches. 4. Conclusion: There's no explicit mention of new product launches, so the answer is False."
+    },
+    {
+      "question_text": "According to the annual report, what is the Cash flow from operations (in GBP) for AA Limited  (within the last period or at the end of the last period)? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": 214000000,
+      "references": [
+        {
+          "pdf_sha1": "aa781901e117281bfee6f8e4bea6fc9c9bada62e",
+          "page_index": 36
+        },
+        {
+          "pdf_sha1": "aa781901e117281bfee6f8e4bea6fc9c9bada62e",
+          "page_index": 14
+        }
+      ],
+      "reasoning_process": "1. **Metric Definition:** The question asks for 'Cash flow from operations' for AA Limited. This metric represents the net amount of cash generated or used by the company's operations during a specific period. 2. **Context Examination:** The context includes 'CONSOLIDATED STATEMENT OF CASH FLOWS' (page 37), a standard financial statement that reports a company's cash inflows and outflows. 3. **Metric Matching:** On page 37, under 'Net cash flows from operating activities', a line item exists that directly matches the concept requested in the question. 4. **Value Extraction and Adjustment:** The value for 'Net cash flows from operating activities' is '£214m'. The context indicates this is in millions of GBP. Therefore, the full value is 214,000,000. 5. **Confirmation**: No calculation beyond unit adjustment was needed. The reported metric directly matches the question."
+    },
+    {
+      "question_text": "For Peako Limited, what was the value of Cloud storage capacity (TB) at the end of the period listed in annual report? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. The question asks for 'Cloud storage capacity (TB)' at the end of the period for Peako Limited. This metric represents the amount of cloud storage space available or utilized by the company, measured in terabytes (TB). 2. Upon reviewing the provided pages from the annual report, there is no direct mention of 'Cloud storage capacity (TB)' or any related metric that specifies the amount of cloud storage used or available to Peako Limited. 3. Since there is no mention of cloud storage capacity in the provided context, we cannot find a metric that exactly matches the concept of 'Cloud storage capacity (TB)' as requested in the question. 4. Given that the context does not provide any information related to cloud storage capacity, we must conclude that the data is not available. 5. The lack of direct information or any metric that could be used to derive the cloud storage capacity without calculation or inference means the answer must be 'N/A'."
+    },
+    {
+      "question_text": "According to the annual report, what is the Total revenue (in USD) for Medallion Financial Corp.  (within the last period or at the end of the last period)? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. The question asks for the 'Total revenue' for Medallion Financial Corp within the last period or at the end of the last period. This requires finding a line item or metric explicitly labeled as 'Total revenue' in the annual report. 2. We reviewed several parts of the report including the Consolidated Statements of Operations (page 71), the segment reporting section (page 92), and the Parent Company Condensed Financial Statements (page 100). None of these sections provide a line item named 'Total revenue'. 3. Instead, the report presents metrics such as 'Total interest income' and various other income and expense items, but there is no direct reference or aggregation titled 'Total revenue'. 4. Since many financial statements for companies in the banking or financial sectors typically focus on interest income and do not explicitly state a 'total revenue' figure, the absence of such a metric means that we do not have a direct answer to the query. 5. Given that the information required by the question is not available in the context provided, we conclude that the appropriate response is to return 'N/A'."
+    },
+    {
+      "question_text": "Did AA Limited report any changes to its capital structure? If there is no mention, return False.",
+      "kind": "boolean",
+      "value": true,
+      "references": [
+        {
+          "pdf_sha1": "aa781901e117281bfee6f8e4bea6fc9c9bada62e",
+          "page_index": 15
+        },
+        {
+          "pdf_sha1": "aa781901e117281bfee6f8e4bea6fc9c9bada62e",
+          "page_index": 53
+        }
+      ],
+      "reasoning_process": "1. The question asks if AA Limited reported any changes to its capital structure, which includes any alterations, additions, or subtractions to the company's capital, encompassing both equity and debt. \n2. To find the answer, we must analyze the provided context, focusing on sections that discuss capital structure, financing, or any changes thereto. \n3. The context reveals discussions about the company's debt and efforts to refinance and reduce its leverage on page 16, indicating changes in the debt portion of its capital structure. \n4. Specific actions such as the issuance of new notes (Class A9 Notes) and the repayment of existing notes (Class A5 Notes) directly point to changes in the company's capital structure. \n5. Furthermore, the mention of an equity contribution of £100m from Bidco and the use of proceeds from the issuance of Class B3 Notes for refinancing purposes further indicates changes to the capital structure, supporting the conclusion that AA Limited did report changes to its capital structure."
+    },
+    {
+      "question_text": "What is the total number of employees let go by KP Tissue Inc. according to the annual report? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. **Metric Definition:** The question asks for the 'total number of employees let go' by KP Tissue Inc. according to the annual report. This metric represents the total count of employees who were laid off or terminated by the company. \\\n2. **Context Examination:** The provided context includes various pages from the annual report, discussing financial statements, notes to financial statements, and other corporate information. However, there is no explicit mention of employees being let go. \\\n3. **Metric Matching:** Upon reviewing the context, there is no direct or indirect information provided about the number of employees let go. The context does mention the total number of employees (approximately 2,700) but does not discuss any layoffs or terminations. \\\n4. **Value Extraction and Adjustment:** Since there is no information available regarding employees being let go, there is no value to extract or adjust. \\\n5. **Confirmation:** Given the lack of relevant information, the answer must reflect that the data is not available."
+    },
+    {
+      "question_text": "Which of the companies had the lowest total revenue in EUR at the end of the period listed in annual report: \"Atreca, Inc.\", \"Poste Italiane\", \"Datalogic\", \"Duni Group\", \"Incyte Corporation\"? If data for the company is not available, exclude it from the comparison. If only one company is left, return this company.",
+      "kind": "name",
+      "value": "Datalogic",
+      "references": [
+        {
+          "pdf_sha1": "980742aa08ea64d552c153bcefbd7e8243fb9efd",
+          "page_index": 138
+        },
+        {
+          "pdf_sha1": "980742aa08ea64d552c153bcefbd7e8243fb9efd",
+          "page_index": 45
+        },
+        {
+          "pdf_sha1": "e7a45fed0d7ebfd13a524e7fcc443318bac654e2",
+          "page_index": 3
+        },
+        {
+          "pdf_sha1": "e7a45fed0d7ebfd13a524e7fcc443318bac654e2",
+          "page_index": 70
+        },
+        {
+          "pdf_sha1": "e7a45fed0d7ebfd13a524e7fcc443318bac654e2",
+          "page_index": 102
+        },
+        {
+          "pdf_sha1": "5f226fe96206888930e3baaf0bff70d4b0a1db40",
+          "page_index": 82
+        },
+        {
+          "pdf_sha1": "5f226fe96206888930e3baaf0bff70d4b0a1db40",
+          "page_index": 99
+        },
+        {
+          "pdf_sha1": "c74139ce26a6f803725f5074a8a0f539abb99c09",
+          "page_index": 541
+        },
+        {
+          "pdf_sha1": "c74139ce26a6f803725f5074a8a0f539abb99c09",
+          "page_index": 243
+        },
+        {
+          "pdf_sha1": "4d3e52b69b4b5366e54ce87cf641b01b1419bdee",
+          "page_index": 84
+        },
+        {
+          "pdf_sha1": "4d3e52b69b4b5366e54ce87cf641b01b1419bdee",
+          "page_index": 35
+        }
+      ],
+      "reasoning_process": "1. The question asks for the company with the lowest total revenue in EUR. \n2. The companies with total revenue in EUR are Datalogic and Poste Italiane. \n3. Gather the total revenue in EUR for each company: Datalogic's total revenue is 654,632,000 EUR, and Poste Italiane's total revenue is 11,889,000,000 EUR. \n4. Compare the total revenue in EUR: Datalogic (654,632,000 EUR) < Poste Italiane (11,889,000,000 EUR). \n5. Exclude companies without total revenue in EUR: Atreca, Inc., Duni Group, and Incyte Corporation are excluded because their total revenue is not reported in EUR. \nTherefore, Datalogic has the lowest total revenue in EUR among the companies with available data."
+    },
+    {
+      "question_text": "Which leadership positions changed at Blue Apron Holdings, Inc. in the reporting period? If data is not available, return 'N/A'. Give me the title of the position.",
+      "kind": "names",
+      "value": [
+        "Chief Supply Chain Officer"
+      ],
+      "references": [
+        {
+          "pdf_sha1": "35839effbc332f23d5f34263aab3dcb2c6976420",
+          "page_index": 136
+        },
+        {
+          "pdf_sha1": "35839effbc332f23d5f34263aab3dcb2c6976420",
+          "page_index": 82
+        }
+      ],
+      "reasoning_process": "1. The question asks for the leadership positions that changed at Blue Apron Holdings, Inc. in the reporting period. \n2. To answer this question, we need to look for information about changes in leadership positions, such as new appointments or departures, in the provided context. \n3. On page 137, we find an offer letter for Christopher Halkyard, who is being offered the position of Chief Supply Chain Officer, effective November 7, 2022. \n4. On page 83, we see that Linda Findley is listed as the President, Chief Executive Officer, and Director, but there is no information about any changes to her position. \n5. On page 77, we find information about the executive officers and corporate governance, but it does not provide specific details about changes in leadership positions during the reporting period. \n6. Based on the available information, we can identify one change in leadership position: Chief Supply Chain Officer. \n7. Since the question asks for the title of the position, we will only include the title of the position that changed, without any additional information."
+    },
+    {
+      "question_text": "What was the Dividend per share (in USD) for Ritchie Bros. Auctioneers Incorporated according to the annual report (within the last period or at the end of the last period)? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": 0.27,
+      "references": [
+        {
+          "pdf_sha1": "78c71282723c2d66216cbba13183d19349d302b8",
+          "page_index": 37
+        },
+        {
+          "pdf_sha1": "78c71282723c2d66216cbba13183d19349d302b8",
+          "page_index": 0
+        }
+      ],
+      "reasoning_process": "1. **Metric Definition:** The question asks for 'Dividend per share' which represents the amount of dividend paid per share of common stock. 2. **Context Examination:** The context includes information about dividends paid by Ritchie Bros. Auctioneers Incorporated, such as the regular quarterly cash dividend. 3. **Metric Matching:** On page 38, under 'Dividend Policy', it is mentioned that 'We currently pay a regular quarterly cash dividend of $0.27 per common share.' This directly matches the concept of dividend per share. 4. **Value Extraction and Adjustment:** The value for 'Dividend per share' is directly stated as $0.27 per common share, requiring no adjustments. 5. **Confirmation**: No calculation beyond unit adjustment was needed. The reported metric directly matches the question."
+    },
+    {
+      "question_text": "What are the names of new products launched by Albany International Corp. as mentioned in the annual report?",
+      "kind": "names",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. The question asks for the names of new products launched by Albany International Corp. as mentioned in the annual report. This means we are looking for specific product names that are identified as new or launched during the period covered by the report. 2. To find information about new products, we should focus on sections related to product development, research and development, and business segment discussions. 3. The text provided includes various pages from the annual report, covering topics such as the company's strategy, business segments, financial statements, and research and development activities. 4. Upon reviewing the text, there are mentions of products and technologies, especially within the Albany Engineered Composites segment, but these are not explicitly stated as new launches. 5. The text does not explicitly mention the launch of new products by name. 6. Based on the provided text, there is no clear mention of specific new product names launched by Albany International Corp. 7. Given the analysis, the final answer should reflect that the information about new product launches is not available in the provided context."
+    },
+    {
+      "question_text": "For Sonic Automotive, Inc., what was the value of Number of hybrid models available at the end of the period listed in annual report? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. **Metric Definition:** The question asks for the 'Number of hybrid models available' at the end of the period listed in the annual report. This metric represents the count of different hybrid vehicle models that Sonic Automotive, Inc. has available for sale or distribution. 2. **Context Examination:** The provided pages from the annual report discuss various aspects of the company's operations, including financial statements, segment information, and management's discussion and analysis, but do not explicitly provide the number of hybrid models available. 3. **Metric Matching:** Since the context does not provide a direct metric that matches the question's request for the 'Number of hybrid models available,' we cannot accept any information as a direct answer. 4. **Value Extraction and Adjustment:** There is no value to extract or adjust because the context lacks a specific line item for 'Number of hybrid models available.' 5. **Confirmation:** The report's lack of specific information on hybrid models means we cannot provide a numerical answer, leading to a conclusion of 'N/A'."
+    },
+    {
+      "question_text": "Did ACRES Commercial Realty Corp. outline any new ESG initiatives in the annual report? If there is no mention, return False.",
+      "kind": "boolean",
+      "value": true,
+      "references": [
+        {
+          "pdf_sha1": "0279901b645e568591ad95dac2c2bf939ef0c00d",
+          "page_index": 3
+        },
+        {
+          "pdf_sha1": "0279901b645e568591ad95dac2c2bf939ef0c00d",
+          "page_index": 20
+        }
+      ],
+      "reasoning_process": "1. I first carefully read the question, which asks whether ACRES Commercial Realty Corp. outlined any new ESG initiatives in the annual report. 2. The question specifically looks for any mention of new initiatives related to environmental, social, or governance matters. 3. I then reviewed the provided context from page 4, where there is a section on Corporate Responsibility and ESG. 4. The text on page 4 explicitly states that during 2022, the company announced a new initiative called the 'ACRES Protects an Acre' initiative, which involves making a donation in connection with each loan closed to a nonprofit organization aimed at protecting vulnerable land. 5. Additionally, the context mentions a new partnership with Project Destined announced early in 2023, which further reflects the company's commitment to ESG objectives. 6. Based on this evidence, the report clearly outlines a new ESG initiative, responding affirmatively to the question asked. 7. Therefore, the final conclusion is that ACRES Commercial Realty Corp. did outline new ESG initiatives in its annual report."
+    },
+    {
+      "question_text": "What was the value of Generic product count of Kiniksa Pharmaceuticals, Ltd. at the end of the period listed in annual report? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. **Metric Definition:** The question asks for 'Generic product count' of Kiniksa Pharmaceuticals, Ltd. at the end of the period listed in the annual report. 'Generic product count' represents the number of generic products the company has at the end of the reporting period. 2. **Context Examination:** The provided pages from the annual report discuss various financial metrics, product revenues, research and development expenses, and other operational details but do not explicitly mention a count of generic products. 3. **Metric Matching:** There is no direct mention or implication of a 'Generic product count' in the provided context, meaning we cannot find a metric that exactly matches the concept requested in the question. 4. **Value Extraction and Adjustment:** Given the information available, there is no basis to calculate or derive the 'Generic product count' from the data provided in the annual report. The report does not include necessary details that could be used to infer or calculate such a metric. 5. **Confirmation**: Since the context lacks a specific line item for 'Generic product count' and we cannot make assumptions, perform calculations, or combine information, the answer is 'N/A'."
+    },
+    {
+      "question_text": "What was the value of Number of fulfillment centers at year-end of 1-800-FLOWERS.COM, INC. at the end of the period listed in annual report? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. **Metric Definition:** The question asks for the 'Number of fulfillment centers' at the year-end of 1-800-FLOWERS.COM, INC. This metric represents the total count of facilities or locations from which the company ships or delivers its products directly to customers at the end of the reporting period. 2. **Context Examination:** The context includes discussions on 'Fulfillment and Manufacturing Operations' but does not provide a direct count of fulfillment centers. 3. **Metric Matching:** The information on page 17 mentions a 'hybrid fulfillment system' and the use of 'Company-owned distribution centers and vendors who ship directly to the Company's customers,' indicating the existence of fulfillment centers but not quantifying them. 4. **Value Extraction and Adjustment:** Since the context does not provide a specific number for fulfillment centers and does not offer enough detail to calculate this number without making assumptions, we conclude the data is not available as requested. 5. **Confirmation:** The exact number of fulfillment centers is not explicitly mentioned, and we cannot accurately derive this information without additional data or assumptions."
+    },
+    {
+      "question_text": "What was the largest single spending of Kiniksa Pharmaceuticals, Ltd. on executive compensation in USD? If data is not available in this currency, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. **Metric Definition:** The question asks for the 'largest single spending on executive compensation in USD.' This represents the highest amount paid to executives, which could include salaries, bonuses, stock options, or other forms of compensation. 2. **Context Examination:** The context includes various financial statements and notes but does not directly mention executive compensation in detail. 3. **Metric Matching:** The information about executive compensation is mentioned to be included in the proxy statement for the 2023 Annual Meeting, which is not provided in the context. 4. **Value Extraction and Adjustment:** Since the specific details about executive compensation are not provided in the context, we cannot directly answer the question based on the given information. 5. **Confirmation**: Given the lack of direct information on executive compensation in the provided context, we should not attempt to guess or infer the answer from other data."
+    },
+    {
+      "question_text": "For Origin Bancorp, Inc., what was the value of Total assets on balance sheet at year-end at the end of the period listed in annual report? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": 9686067000,
+      "references": [
+        {
+          "pdf_sha1": "3f36d4f26ada778d89cf5a7344be0b9e9a5223a3",
+          "page_index": 190
+        },
+        {
+          "pdf_sha1": "3f36d4f26ada778d89cf5a7344be0b9e9a5223a3",
+          "page_index": 252
+        }
+      ],
+      "reasoning_process": "1. **Metric Definition:** The question asks for 'Total assets' on the balance sheet at year-end. Total assets represent the sum of all resources owned or controlled by the company, expected to provide future economic benefits. 2. **Context Examination:** The context includes 'Consolidated Balance Sheets' (page 191), a standard financial statement that reports a company's assets, liabilities, and equity. 3. **Metric Matching:** On page 191, under 'December 31, 2022', a line item labeled 'Total assets' exists. This directly matches the concept requested in the question. 4. **Value Extraction and Adjustment:** The value for 'Total assets' is '$9,686,067'. The context indicates this is in thousands of dollars. Therefore, the full value is 9,686,067,000. 5. **Confirmation**: No calculation beyond unit adjustment was needed. The reported metric directly matches the question."
+    },
+    {
+      "question_text": "Did Ritchie Bros. Auctioneers Incorporated mention any ongoing litigation or regulatory inquiries? If there is no mention, return False.",
+      "kind": "boolean",
+      "value": true,
+      "references": [
+        {
+          "pdf_sha1": "78c71282723c2d66216cbba13183d19349d302b8",
+          "page_index": 36
+        },
+        {
+          "pdf_sha1": "78c71282723c2d66216cbba13183d19349d302b8",
+          "page_index": 129
+        }
+      ],
+      "reasoning_process": "1. The question asks whether Ritchie Bros. Auctioneers Incorporated mentioned any ongoing litigation or regulatory inquiries in its annual report. 2. To answer this, I reviewed the context provided for references to legal matters, especially the section on Legal Proceedings. 3. On page 37, the report clearly states, 'We have no material legal proceedings pending, other than ordinary routine litigation incidental to the business, and we do not know of any material proceedings contemplated by governmental authorities.' This sentence confirms that while there is mention of litigation, it is limited to routine matters that are not considered material. 4. It also indicates that there are no significant regulatory inquiries or material legal actions underway by stating that no material proceedings are pending or expected. 5. Thus, even though there is a mention of litigation, it is only ordinary and routine, and there are no significant regulatory inquiries or material litigation issues. 6. Therefore, there is indeed a reference to ongoing litigation, albeit routine in nature, which answers the question. 7. Based on the wording of the question, the answer should be True since routine litigation is mentioned, even if it is not material."
+    },
+    {
+      "question_text": "What is the total number of employees let go by Commerzbank according to the annual report? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": 9000,
+      "references": [
+        {
+          "pdf_sha1": "696ddc4c80febe0f1559ed3b1272487c74ca91cc",
+          "page_index": 90
+        },
+        {
+          "pdf_sha1": "696ddc4c80febe0f1559ed3b1272487c74ca91cc",
+          "page_index": 199
+        }
+      ],
+      "reasoning_process": "1. **Metric Definition:** The question asks for the 'total number of employees let go' by Commerzbank according to the annual report. This metric represents the total count of employees who left the company, which could be due to various reasons such as layoffs, retirements, or resignations. 2. **Context Examination:** The context provided includes various pages from Commerzbank's annual report, detailing different aspects of the company's performance and operations. We need to examine these pages to find information related to the number of employees let go. 3. **Metric Matching:** Upon reviewing the provided pages, we find relevant information on page 91, which discusses the 'Summary of 2022 business position' and mentions the reduction of full-time positions. It states, 'The reduction of almost 9,000 positions was contracted by the end of 2022, the majority of them in Germany.' This information directly relates to the number of employees let go. 4. **Value Extraction and Adjustment:** The value mentioned is 'almost 9,000 positions,' which indicates the number of employees let go. However, it's essential to note that this figure might not be exact, as it's described as 'almost.' Nonetheless, for the purpose of answering the question based on the provided data, we will consider this as the closest available figure. 5. **Confirmation:** The information found on page 91 directly addresses the question about the total number of employees let go by Commerzbank. There's no need for further calculations or inferences, as the data is explicitly stated in the context."
+    },
+    {
+      "question_text": "Which of the companies had the lowest total assets in EUR at the end of the period listed in annual report: \"Poste Italiane\", \"NuCana plc\", \"Incyte Corporation\", \"INMUNE BIO INC.\", \"Atreca, Inc.\"? If data for the company is not available, exclude it from the comparison. If only one company is left, return this company.",
+      "kind": "name",
+      "value": "Poste Italiane",
+      "references": [
+        {
+          "pdf_sha1": "553afbf09b6d83166b17acb02431c6cf38e4defc",
+          "page_index": 47
+        },
+        {
+          "pdf_sha1": "553afbf09b6d83166b17acb02431c6cf38e4defc",
+          "page_index": 0
+        },
+        {
+          "pdf_sha1": "c74139ce26a6f803725f5074a8a0f539abb99c09",
+          "page_index": 539
+        },
+        {
+          "pdf_sha1": "c74139ce26a6f803725f5074a8a0f539abb99c09",
+          "page_index": 234
+        },
+        {
+          "pdf_sha1": "5f226fe96206888930e3baaf0bff70d4b0a1db40",
+          "page_index": 81
+        },
+        {
+          "pdf_sha1": "5f226fe96206888930e3baaf0bff70d4b0a1db40",
+          "page_index": 82
+        },
+        {
+          "pdf_sha1": "4d3e52b69b4b5366e54ce87cf641b01b1419bdee",
+          "page_index": 83
+        },
+        {
+          "pdf_sha1": "4d3e52b69b4b5366e54ce87cf641b01b1419bdee",
+          "page_index": 87
+        },
+        {
+          "pdf_sha1": "9b7fdb871fc4d4a8babc25448257ae0b81a6442d",
+          "page_index": 167
+        },
+        {
+          "pdf_sha1": "9b7fdb871fc4d4a8babc25448257ae0b81a6442d",
+          "page_index": 166
+        }
+      ],
+      "reasoning_process": "1. The question asks for the company with the lowest total assets in EUR at the end of the period listed in the annual report. \n2. Gather the total assets in EUR for each company from the individual answers: Poste Italiane: 261,626,000,000 EUR.\n3. The other companies (NuCana plc, Incyte Corporation, INMUNE BIO INC., Atreca, Inc.) are excluded because their assets are not reported in EUR or the data is not available.\n4. Since only one company (Poste Italiane) has its total assets reported in EUR, it is the only company left for comparison.\n5. Therefore, Poste Italiane has the lowest total assets in EUR by default since it's the only one that can be considered."
+    },
+    {
+      "question_text": "For HCA Healthcare, Inc., what was the value of Number of managed clinics at year-end at the end of the period listed in annual report? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. **Metric Definition:** The question asks for the 'Number of managed clinics at year-end' for HCA Healthcare, Inc. This metric represents the total count of managed clinics owned or operated by the company at the end of the reporting period. \n2. **Context Examination:** The provided context includes various pages from HCA Healthcare, Inc.'s annual report, detailing their operations, financial performance, and other relevant information. \n3. **Metric Matching:** Upon examining the context, there is no direct mention of 'Number of managed clinics at year-end.' However, page 3 mentions '1,616 physician practices' and '270 urgent care clinics' as part of their services, but it does not explicitly state 'managed clinics.' \n4. **Value Extraction and Adjustment:** Since the exact term 'Number of managed clinics at year-end' is not found in the provided context, and the closest related information does not directly match the requested metric, we cannot accurately extract or adjust a value for 'Number of managed clinics at year-end.' \n5. **Conclusion:** Given the information available, the metric 'Number of managed clinics at year-end' is not directly stated in the context, leading to the conclusion that the data is not available as requested."
+    },
+    {
+      "question_text": "For RWE AG, what was the value of Number of facilities at year-end at the end of the period listed in annual report? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. **Metric Definition:** The question asks for the 'Number of facilities at year-end.' This metric represents the total count of facilities that RWE AG has at the end of the reporting period. 2. **Context Examination:** The context includes various sections from RWE AG's annual report, such as the combined review of operations, responsibility statement, consolidated financial statements, and further information. We need to look for sections that discuss the number of facilities or operational assets. 3. **Metric Matching:** Upon reviewing the context, we find that the report discusses the company's generation capacity, investments in new wind farms, photovoltaic assets, and other energy-related projects. However, it does not explicitly provide a total count of facilities at year-end. 4. **Value Extraction and Adjustment:** Given that the context does not provide a direct count of facilities at year-end, and calculating or deriving such a number would require additional information or assumptions, we must reject the possibility of providing a numerical answer. 5. **Confirmation**: Since there is no clear, direct information about the 'Number of facilities at year-end' in the provided context, and any attempt to calculate this would involve guesswork or inference, the appropriate response is 'N/A'."
+    },
+    {
+      "question_text": "Which of the companies had the lowest net income in EUR at the end of the period listed in annual report: \"Atreca, Inc.\", \"INMUNE BIO INC.\", \"Datalogic\", \"NuCana plc\", \"RWE AG\"? If data for the company is not available, exclude it from the comparison. If only one company is left, return this company.",
+      "kind": "name",
+      "value": "Datalogic",
+      "references": [
+        {
+          "pdf_sha1": "cc0fc5888b99758100a7ff024863fc4337b6b3c5",
+          "page_index": 118
+        },
+        {
+          "pdf_sha1": "cc0fc5888b99758100a7ff024863fc4337b6b3c5",
+          "page_index": 282
+        },
+        {
+          "pdf_sha1": "553afbf09b6d83166b17acb02431c6cf38e4defc",
+          "page_index": 47
+        },
+        {
+          "pdf_sha1": "553afbf09b6d83166b17acb02431c6cf38e4defc",
+          "page_index": 48
+        },
+        {
+          "pdf_sha1": "9b7fdb871fc4d4a8babc25448257ae0b81a6442d",
+          "page_index": 165
+        },
+        {
+          "pdf_sha1": "9b7fdb871fc4d4a8babc25448257ae0b81a6442d",
+          "page_index": 166
+        },
+        {
+          "pdf_sha1": "5f226fe96206888930e3baaf0bff70d4b0a1db40",
+          "page_index": 82
+        },
+        {
+          "pdf_sha1": "5f226fe96206888930e3baaf0bff70d4b0a1db40",
+          "page_index": 83
+        },
+        {
+          "pdf_sha1": "980742aa08ea64d552c153bcefbd7e8243fb9efd",
+          "page_index": 44
+        },
+        {
+          "pdf_sha1": "980742aa08ea64d552c153bcefbd7e8243fb9efd",
+          "page_index": 39
+        }
+      ],
+      "reasoning_process": "1. The question asks for the company with the lowest net income in EUR. 2. Gather the net income in EUR for each company from the individual answers: Atreca, Inc. and INMUNE BIO INC. are excluded because their financial data is not available in EUR. NuCana plc is also excluded due to the lack of net income in EUR. 3. Compare the net income in EUR for Datalogic and RWE AG: Datalogic (€30,100,000) < RWE AG (€2,717,000,000). 4. Datalogic has the lowest net income in EUR among the eligible companies. 5. Therefore, Datalogic is the company with the lowest net income in EUR."
+    },
+    {
+      "question_text": "For Albany International Corp., what was the value of R&D spending on advanced programs at the end of the period listed in annual report? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. **Metric Definition:** The question asks for the 'R&D spending on advanced programs' for Albany International Corp. This implies we are looking for research and development expenses specifically related to advanced programs. 2. **Context Examination:** The context includes various financial statements and discussions about the company's operations, including research and development activities. Specifically, page 39 discusses 'Research and Development' expenses, providing a breakdown by business segment. 3. **Metric Matching:** On page 39, under 'Research and Development,' there is a table summarizing expenses associated with internally funded research and development by business segment. This includes $16,060 for Machine Clothing and $15,353 for Albany Engineered Composites in 2022, totaling $31,413. 4. **Value Extraction and Adjustment:** The total R&D expense is given as $31,413,000. There's no indication that this value needs adjustment for units (it's already in thousands), and it directly pertains to the company's R&D spending. 5. **Confirmation:** The question specifically asks for R&D spending on 'advanced programs.' While the context does not explicitly use this term, the discussion on research and development implies that these expenses are for advancing the company's technologies and products, which can be inferred to include advanced programs. However, the context does not provide a direct, explicit metric labeled as 'R&D spending on advanced programs.' Given the information provided and the strict guidelines for answering, we must consider if the available data directly answers the question as phrased."
+    },
+    {
+      "question_text": "For Rectifier Technologies Ltd, what was the value of Number of patents at year-end at the end of the period listed in annual report? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. **Metric Definition:** The question asks for the 'Number of patents at year-end' for Rectifier Technologies Ltd. This metric represents the total count of patents held by the company at the end of the reporting period. \n2. **Context Examination:** The provided context includes various financial statements and reports, such as the Directors' report, Statement of financial position, and Notes to the financial statements. However, none of these directly mention 'Number of patents at year-end'. \n3. **Metric Matching:** Upon reviewing the context, there is no line item or section that directly matches the concept of 'Number of patents at year-end'. The context does discuss intangibles and intellectual property but does not provide a specific count of patents. \n4. **Value Extraction and Adjustment:** Since the context does not provide a direct value for 'Number of patents at year-end', we cannot extract or adjust any value to answer the question. \n5. **Conclusion:** Given the lack of direct information on the 'Number of patents at year-end' in the provided context, the answer must be 'N/A' as per the instructions for handling unavailable data."
+    },
+    {
+      "question_text": "For Albany International Corp., what was the value of Year-end patent portfolio (aerospace tech) at the end of the period listed in annual report? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. **Metric Definition:** The question asks for the 'Year-end patent portfolio (aerospace tech)' value for Albany International Corp. This refers to the number of patents related to aerospace technology that the company holds at the end of the reporting period. 2. **Context Examination:** The context includes various financial statements and notes from the annual report of Albany International Corp. We need to examine these to find any information related to the company's patent portfolio, specifically focusing on aerospace technology. 3. **Metric Matching:** Upon reviewing the context, we find information related to patents in the section discussing research and development and intellectual property. However, the specific mention of an 'aerospace tech' patent portfolio is not directly referenced in the provided context. 4. **Value Extraction and Adjustment:** Given that the context does not provide a specific value for the 'Year-end patent portfolio (aerospace tech),' we cannot directly extract a numerical value that matches the question's metric. 5. **Conclusion:** Since the context does not provide a direct answer to the question about the 'Year-end patent portfolio (aerospace tech)' and does not allow for the calculation or derivation of such a value without making assumptions, the answer must be 'N/A'."
+    },
+    {
+      "question_text": "Which of the companies had the lowest net income in EUR at the end of the period listed in annual report: \"Datalogic\", \"NuCana plc\", \"Duni Group\", \"Playtech plc\", \"Atreca, Inc.\"? If data for the company is not available, exclude it from the comparison. If only one company is left, return this company.",
+      "kind": "name",
+      "value": "Datalogic",
+      "references": [
+        {
+          "pdf_sha1": "ded965ce7e3ea0ad9b83272b8c36f529793a2887",
+          "page_index": 79
+        },
+        {
+          "pdf_sha1": "ded965ce7e3ea0ad9b83272b8c36f529793a2887",
+          "page_index": 0
+        },
+        {
+          "pdf_sha1": "980742aa08ea64d552c153bcefbd7e8243fb9efd",
+          "page_index": 44
+        },
+        {
+          "pdf_sha1": "980742aa08ea64d552c153bcefbd7e8243fb9efd",
+          "page_index": 39
+        },
+        {
+          "pdf_sha1": "e7a45fed0d7ebfd13a524e7fcc443318bac654e2",
+          "page_index": 73
+        },
+        {
+          "pdf_sha1": "e7a45fed0d7ebfd13a524e7fcc443318bac654e2",
+          "page_index": 97
+        },
+        {
+          "pdf_sha1": "5f226fe96206888930e3baaf0bff70d4b0a1db40",
+          "page_index": 82
+        },
+        {
+          "pdf_sha1": "5f226fe96206888930e3baaf0bff70d4b0a1db40",
+          "page_index": 83
+        },
+        {
+          "pdf_sha1": "9b7fdb871fc4d4a8babc25448257ae0b81a6442d",
+          "page_index": 165
+        },
+        {
+          "pdf_sha1": "9b7fdb871fc4d4a8babc25448257ae0b81a6442d",
+          "page_index": 166
+        }
+      ],
+      "reasoning_process": "1. The question asks for the company with the lowest net income in EUR. \n2. Gather the net income in EUR for each company from the individual answers: Playtech plc: €40.6 million; Datalogic: €30.1 million; Duni Group: N/A; Atreca, Inc.: N/A; NuCana plc: N/A. \n3. Exclude Duni Group, Atreca, Inc., and NuCana plc because their net income is not reported in EUR. \n4. Compare the net income in EUR for the remaining companies: Datalogic (€30.1 million) < Playtech plc (€40.6 million). \n5. Therefore, Datalogic has the lowest net income in EUR."
+    },
+    {
+      "question_text": "For SThree plc, what was the value of End-of-year total headcount at the end of the period listed in annual report? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. **Metric Definition:** The question asks for 'End-of-year total headcount' for SThree plc. 'End-of-year total headcount' represents the total number of employees at the end of the reporting period. \n2. **Context Examination:** The context includes 'Five-year financial summary' (page 126), a standard financial summary that reports various financial and operational metrics of the company. \n3. **Metric Matching:** On page 126, under 'Group operational statistics', a line item labeled 'Average total headcount' exists. However, this is not the exact metric we are looking for, as it represents an average over the year, not the total at the end of the year. \n4. **Further Examination:** On page 106, under '4 Directors and employees continued', there is a table that provides the 'Average monthly number of employees' for different regions. However, this also does not directly provide the 'End-of-year total headcount'. \n5. **Conclusion:** Since the context does not provide a direct 'End-of-year total headcount' metric, and calculating or deriving it from other metrics is not allowed according to the instructions, the answer must be 'N/A'."
+    },
+    {
+      "question_text": "Which of the companies had the lowest total assets in EUR at the end of the period listed in annual report: \"Playtech plc\", \"Datalogic\", \"Duni Group\", \"Poste Italiane\", \"Incyte Corporation\"? If data for the company is not available, exclude it from the comparison. If only one company is left, return this company.",
+      "kind": "name",
+      "value": "Datalogic",
+      "references": [
+        {
+          "pdf_sha1": "e7a45fed0d7ebfd13a524e7fcc443318bac654e2",
+          "page_index": 100
+        },
+        {
+          "pdf_sha1": "e7a45fed0d7ebfd13a524e7fcc443318bac654e2",
+          "page_index": 33
+        },
+        {
+          "pdf_sha1": "c74139ce26a6f803725f5074a8a0f539abb99c09",
+          "page_index": 793
+        },
+        {
+          "pdf_sha1": "c74139ce26a6f803725f5074a8a0f539abb99c09",
+          "page_index": 617
+        },
+        {
+          "pdf_sha1": "ded965ce7e3ea0ad9b83272b8c36f529793a2887",
+          "page_index": 227
+        },
+        {
+          "pdf_sha1": "ded965ce7e3ea0ad9b83272b8c36f529793a2887",
+          "page_index": 214
+        },
+        {
+          "pdf_sha1": "980742aa08ea64d552c153bcefbd7e8243fb9efd",
+          "page_index": 110
+        },
+        {
+          "pdf_sha1": "980742aa08ea64d552c153bcefbd7e8243fb9efd",
+          "page_index": 33
+        },
+        {
+          "pdf_sha1": "4d3e52b69b4b5366e54ce87cf641b01b1419bdee",
+          "page_index": 83
+        },
+        {
+          "pdf_sha1": "4d3e52b69b4b5366e54ce87cf641b01b1419bdee",
+          "page_index": 86
+        }
+      ],
+      "reasoning_process": "1. The question asks for the company with the lowest total assets in EUR. The companies mentioned are Playtech plc, Datalogic, Duni Group, Poste Italiane, and Incyte Corporation. 2. Gather the total assets in EUR for each company from the individual answers: Playtech plc: €3,002.8 million, Datalogic: 848,979 (unit not specified, but assuming it's in EUR for the sake of comparison), Duni Group: N/A (total assets are given in SEK, not EUR), Poste Italiane: €104,437,939,842, Incyte Corporation: N/A (total assets are given in USD, not EUR). 3. Exclude Duni Group and Incyte Corporation because their total assets are not reported in EUR. 4. Compare the total assets in EUR: Datalogic (848,979 EUR) < Playtech plc (3,002,800,000 EUR) < Poste Italiane (104,437,939,842 EUR). 5. Therefore, Datalogic has the lowest total assets in EUR."
+    },
+    {
+      "question_text": "For HCA Healthcare, Inc., what was the value of Number of healthcare professionals on staff at the end of the period listed in annual report? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. The question requests the value for the 'Number of healthcare professionals on staff at the end of the period' for HCA Healthcare, Inc., which implies a specific metric that should reflect the count of healthcare professionals. 2. I carefully reviewed the provided context including multiple pages from the annual report, focusing on employee-related figures and staffing metrics. 3. The report mentions numbers such as 'nearly 294,000 colleagues' and '45,000 physicians on our medical staff' on page 3, as well as other employment data on page 2, but there is no explicit metric labeled 'Number of healthcare professionals on staff'. 4. The '294,000 colleagues' figure appears to be an overall employment number and does not isolate healthcare professionals exclusively; similarly, the 45,000 physicians are only a subset of healthcare professionals. 5. Since the report does not clearly state a dedicated metric for the total number of healthcare professionals and the provided numbers cover different categories that do not directly combine into the requested metric, the correct response following strict metric matching is to return 'N/A'."
+    },
+    {
+      "question_text": "For SIG plc, what was the value of Number of stores at year-end at the end of the period listed in annual report? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": 440,
+      "references": [
+        {
+          "pdf_sha1": "2db41ba86cc015db1f5f7de00b764a06e6de3dcc",
+          "page_index": 3
+        },
+        {
+          "pdf_sha1": "2db41ba86cc015db1f5f7de00b764a06e6de3dcc",
+          "page_index": 4
+        }
+      ],
+      "reasoning_process": "1. **Metric Definition:** The question asks for 'Number of stores at year-end' for SIG plc, which represents the total count of stores or branches at the end of the reporting period. 2. **Context Examination:** The context includes various pages from the SIG Annual Report and Accounts 2022. 3. **Metric Matching:** Page 4 mentions '440+ sites', directly relating to the number of stores or sites SIG plc operates. 4. **Value Extraction and Adjustment:** The value '440' is considered, noting that the actual number might be higher due to the '+' symbol. 5. **Confirmation:** Given the lack of a more specific number, '440' is used as the closest available value."
+    },
+    {
+      "question_text": "Which leadership positions changed at Kelly Partners Group Holdings Limited in the reporting period? If data is not available, return 'N/A'. Give me the title of the position.",
+      "kind": "names",
+      "value": [
+        "Non-Executive Independent Director"
+      ],
+      "references": [
+        {
+          "pdf_sha1": "c8af22dbedd95ee719273792e5964ab8bbba17b2",
+          "page_index": 3
+        },
+        {
+          "pdf_sha1": "c8af22dbedd95ee719273792e5964ab8bbba17b2",
+          "page_index": 13
+        },
+        {
+          "pdf_sha1": "c8af22dbedd95ee719273792e5964ab8bbba17b2",
+          "page_index": 16
+        }
+      ],
+      "reasoning_process": "1. The question asks for changes in leadership positions at Kelly Partners Group Holdings Limited during the reporting period. \n2. The Directors' Report for the year ended 30 June 2022 provides information on the company's operations, financial performance, and significant events, including changes in leadership positions. \n3. Key leadership positions typically include the Chairman, Chief Executive Officer (CEO), Executive Directors, and Non-Executive Directors. Changes in these positions are significant and would be reported. \n4. Page 4 mentions the directors of Kelly Partners Group Holdings Limited during the whole of the financial year and up to the date of the report, including the appointment of Lawrence Cunningham as a Non-Executive Independent Director on 1 July 2022. \n5. Page 14 provides more details about the directors, including their titles, qualifications, experience, and other current and former directorships, confirming the appointment of Lawrence Cunningham. \n6. Page 17 gives additional information about the directors, including their service agreements and remuneration, but does not mention any changes in leadership positions other than the appointment of Lawrence Cunningham. \n7. Based on the information provided, the only change in leadership positions mentioned is the appointment of Lawrence Cunningham as a Non-Executive Independent Director on 1 July 2022."
+    },
+    {
+      "question_text": "Did Trinity Place Holdings Inc. mention any mergers or acquisitions in the annual report? If there is no mention, return False.",
+      "kind": "boolean",
+      "value": true,
+      "references": [
+        {
+          "pdf_sha1": "e229fc9f5c694e93b02ac312c231607a04e3e528",
+          "page_index": 2
+        },
+        {
+          "pdf_sha1": "e229fc9f5c694e93b02ac312c231607a04e3e528",
+          "page_index": 4
+        }
+      ],
+      "reasoning_process": "1. The question asks if Trinity Place Holdings Inc. mentioned any mergers or acquisitions in their annual report. \n2. We identified relevant sections that could discuss mergers and acquisitions, such as business operations or strategic plans. \n3. On page 3, the text mentions exploring strategic alternatives, including a sale or merger of the Company, indicating that mergers or acquisitions are being considered."
+    },
+    {
+      "question_text": "For FNCB Bancorp, Inc., what was the value of Non-performing loan ratio (NPL) at year-end at the end of the period listed in annual report? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": 0.25,
+      "references": [
+        {
+          "pdf_sha1": "23b2c590c4887dfb86761730dd7156fe3b216ab7",
+          "page_index": 51
+        }
+      ],
+      "reasoning_process": "1. **Metric Definition:** The question asks for the 'Non-performing loan ratio (NPL)' for FNCB Bancorp, Inc. at year-end December 31, 2022. The NPL ratio is calculated as the total amount of non-performing loans divided by total gross loans, expressed as a percentage. This ratio indicates the proportion of loans that are not being paid as agreed.  \n2. **Context Examination:** The relevant context includes information about non-performing loans and their ratios on page 52. It mentions the ratio of non-performing loans to total gross loans decreased to 0.25% as of December 31, 2022.  \n3. **Metric Matching:** The context explicitly states the NPL ratio for the year-end of December 31, 2022, which is 0.25%. This directly matches the question's requirement for the NPL ratio.  \n4. **Value Extraction and Adjustment:** The value extracted from the context is already in percentage form (0.25%), meaning no further adjustments are necessary.  \n5. **Confirmation:** The reported NPL ratio directly corresponds to the question's request for the year-end value, confirming the answer is accurate and complete."
+    },
+    {
+      "question_text": "Did Elixir Energy Limited outline any new ESG initiatives in the annual report? If there is no mention, return False.",
+      "kind": "boolean",
+      "value": false,
+      "references": [
+        {
+          "pdf_sha1": "f879b3a802ccd6e8e6ca0a07ed8464318b7c0724",
+          "page_index": 9
+        },
+        {
+          "pdf_sha1": "f879b3a802ccd6e8e6ca0a07ed8464318b7c0724",
+          "page_index": 15
+        }
+      ],
+      "reasoning_process": "1. The question asks whether Elixir Energy Limited outlined any new ESG initiatives in the annual report. To answer this, we need to look for any mentions of ESG (Environmental, Social, and Governance) initiatives in the provided text. \n2. On page 10, the text mentions that Elixir Energy Limited is committed to meeting best practices on the 'ESG' front and that it will issue a separate ESG Report contemporaneously with the Annual Report. This suggests that ESG is an important consideration for the company. \n3. However, the question asks specifically about 'new' ESG initiatives. While the text does mention ESG and the company's commitment to it, it does not explicitly mention any new initiatives. \n4. Given the information provided, it seems that the company is emphasizing its ongoing commitment to ESG rather than introducing new initiatives. \n5. Since the question specifically asks for new initiatives and there is no clear mention of such, the answer would be based on the absence of explicit information about new ESG initiatives."
+    },
+    {
+      "question_text": "What was the value of Year-end user base of archTIS Limited at the end of the period listed in annual report? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. **Metric Definition:** The question asks for the 'Year-end user base' of 'archTIS Limited' at the end of the period listed in the annual report. The 'Year-end user base' refers to the total number of users of archTIS Limited's products or services at the end of the financial year. \\\n2. **Context Examination:** The provided context includes various pages from the annual report, such as pages 59, 9, 19, 84, 3, 49, 43, 57, 7, 2, 12, and others. However, none of these pages directly mention the 'Year-end user base' of archTIS Limited. \\\n3. **Metric Matching:** Upon examining the context, there is no direct mention of the 'Year-end user base' of archTIS Limited. The context does provide information on the company's revenue, gross profit, customer wins, and alliance development, but it does not explicitly state the number of users at the end of the period. \\\n4. **Value Extraction and Adjustment:** Since the context does not provide a direct value for the 'Year-end user base', we cannot extract or adjust any value. \\\n5. **Confirmation:** Given the lack of direct information on the 'Year-end user base', we must conclude that the data is not available in the provided context."
+    },
+    {
+      "question_text": "What was the largest single spending of MainStreet Bancshares, Inc. on executive compensation in USD? If data is not available in this currency, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. **Metric Definition:** The question asks for the 'largest single spending of MainStreet Bancshares, Inc. on executive compensation' in USD. This refers to the highest amount spent by the company on compensating its executives. \\\n    2. **Context Examination:** The provided context includes various financial statements and discussions about the company's performance, but it does not explicitly mention 'executive compensation' as a separate line item in the expenses or provide a detailed breakdown of compensation expenses. \\\n    3. **Metric Matching:** Upon reviewing the context, there is no direct mention of the largest single spending on executive compensation. The context does provide information on salaries and employee benefits, which could encompass executive compensation, but it does not specify the compensation for executives separately. \\\n    4. **Value Extraction and Adjustment:** Since the context does not provide a specific value for executive compensation, we cannot extract or adjust any value to answer the question. \\\n    5. **Conclusion:** Given that the context does not provide the necessary information to determine the largest single spending on executive compensation, the answer must be 'N/A'."
+    },
+    {
+      "question_text": "What was the Capital expenditures (in USD) for Structural Monitoring Systems Plc according to the annual report (within the last period or at the end of the last period)? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. The question asks for the capital expenditures (in USD) for Structural Monitoring Systems Plc as reported in the annual report for the most recent period. We must be precise and check if the capital expenditure amount is directly stated in USD. 2. We reviewed the context provided, particularly pages 38 and 39 that include tables under 'Other segment information' detailing 'Capital expenditure'. In the table on page 38, a capital expenditure value of 348 (in $000) is provided. 3. However, we must note that the reports and financial tables are presented in the company’s reporting currency. The annual report notes state that the functional and presentation currency for Structural Monitoring Systems Plc is Australian dollars. 4. The question specifically requests the figure in USD. There is no conversion rate or USD-specific figure provided in the context; only the reported number 348 (in $000) in the table is available, which is expressed in the company’s original currency. 5. Since no USD conversion is provided or available from the context, we must strictly adhere to the information available and conclude that the capital expenditures (in USD) are not directly reported in the annual report."
+    },
+    {
+      "question_text": "What was the Capital expenditures (in EUR) for INMUNE BIO INC. according to the annual report (within the last period or at the end of the last period)? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. **Metric Definition:** The question asks for 'Capital expenditures' in EUR. 'Capital expenditures' refers to the funds used by a company to acquire, upgrade, and maintain physical assets such as property, buildings, equipment, and technology. The question specifically requests this information in Euros (EUR). 2. **Context Examination:** The provided pages from the annual report of INMUNE BIO INC were examined for sections that discuss expenditures or investments in assets, such as 'Cash Flows,' 'Investing Activities,' or any part that mentions asset purchases or upgrades. 3. **Metric Matching:** The report does not explicitly mention 'Capital expenditures' in EUR. The sections on 'Cash Flows' and 'Investing Activities' provide information on cash used in investing activities but do not specify the currency as EUR. 4. **Value Extraction and Adjustment:** Since the report mentions USD in various places but does not provide a direct conversion to EUR for capital expenditures, and there is no explicit mention of capital expenditures in the provided context that matches the question's criteria (in EUR), the information cannot be directly used to answer the question. 5. **Confirmation**: Given the lack of direct information on 'Capital expenditures' in EUR and the requirement to not perform calculations or inferences, the answer must be 'N/A'."
+    },
+    {
+      "question_text": "What is the name of the last product launched by 1-800-FLOWERS.COM, INC. as mentioned in the annual report?",
+      "kind": "name",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. The question asks for the name of the last product launched by 1-800-FLOWERS.COM, INC. as mentioned in the annual report. To answer this, we need to carefully read through the provided text to identify any mentions of new product launches. \n2. Upon reviewing the text, we find that the company has acquired several businesses and launched new products, but the question specifically asks for the 'last' product launched. \n3. On page 11, the company mentions its acquisition of PersonalizationMall.com LLC ('PersonalizationMall') on August 3, 2020, and Vital Choice Seafood LLC ('Vital Choice') on October 27, 2021. Additionally, it acquired Alice's Table on December 31, 2021. \n4. The company also mentions the launch of lifestyle offerings, including fully digital livestreaming floral, culinary, and other experiences to guests across the country through Alice's Table. \n5. Based on the information provided, the last product or service launched by 1-800-FLOWERS.COM, INC. is the lifestyle offerings through Alice's Table, which includes fully digital livestreaming experiences. However, the question seems to be asking for a specific product name, which is not explicitly mentioned in the context of being the 'last' product launched. \n6. Given the information available, it seems that the company's focus has been on acquiring and integrating new businesses and brands rather than launching a single new product. Therefore, the answer to the question about the 'last product launched' might not be directly stated in the provided text. \n7. Considering the acquisitions and the launch of new services, the closest mention to a new product or service is the acquisition of Alice's Table and the introduction of its lifestyle offerings, but this is more of a service than a product. \n8. Since the question specifically asks for the name of the last product launched and given the context provided, it appears there might be some confusion in the question's wording or the company's announcements, as the focus has been more on services and brand acquisitions. \n9. However, without explicit mention of a 'last product' in the traditional sense (e.g., a new type of flower arrangement, gift basket, etc.), we must conclude based on the information given. \n10. The annual report discusses various products and services, especially under the sections describing the company's business segments and product offerings, but it does not explicitly state the 'last' product launched in a manner that directly answers the question."
+    },
+    {
+      "question_text": "For Peako Limited, what was the value of Year-end customer base at the end of the period listed in annual report? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. **Metric Definition:** The question asks for the 'Year-end customer base' for Peako Limited. 'Year-end customer base' refers to the total number of customers at the end of the reporting period. \n2. **Context Examination:** The provided context includes various financial statements and reports, such as the Directors' Report, Independent Auditor's Report, and Notes to the Financial Statements. However, none of these reports directly mention 'Year-end customer base' or provide a specific number for the customer base at the end of the period. \n3. **Metric Matching:** Since 'Year-end customer base' is not explicitly mentioned in the context, we need to look for related metrics that could potentially match or provide insight into the customer base. However, upon reviewing the context, there is no information directly related to the number of customers at the end of the period. \n4. **Value Extraction and Adjustment:** Given that there is no direct or indirect information about the 'Year-end customer base', no value can be extracted or adjusted for this metric. \n5. **Conclusion:** Since the context does not provide any information about the 'Year-end customer base' for Peako Limited, the answer must be 'N/A' as per the instructions for handling unavailable data."
+    },
+    {
+      "question_text": "According to the annual report, what is the Cash flow from operations (in USD) for FNCB Bancorp, Inc.  (within the last period or at the end of the last period)? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": 19970000,
+      "references": [
+        {
+          "pdf_sha1": "23b2c590c4887dfb86761730dd7156fe3b216ab7",
+          "page_index": 58
+        },
+        {
+          "pdf_sha1": "23b2c590c4887dfb86761730dd7156fe3b216ab7",
+          "page_index": 70
+        }
+      ],
+      "reasoning_process": "1. **Metric Definition:** The question asks for the 'Cash flow from operations' which refers to the net amount of cash generated or used by a company's operations during a specific period. This metric is crucial for understanding a company's ability to generate cash from its core business activities. 2. **Context Examination:** Looking through the provided pages, the most relevant information regarding cash flows is typically found in the Consolidated Statements of Cash Flows. This statement categorizes cash flows into three main sections: operating activities, investing activities, and financing activities. 3. **Metric Matching:** The specific line item we are looking for is 'Net cash provided by operating activities' since it directly corresponds to the cash flow from operations. 4. **Value Extraction and Adjustment:** Upon locating the Consolidated Statements of Cash Flows, we find that the net cash provided by operating activities for the year ended December 31, 2022, is $19,970 thousand. 5. **Confirmation:** Since the question asks for the value in USD and the report mentions that the values are in thousands, we need to adjust the value by multiplying by 1,000 to convert it into dollars. Thus, $19,970 thousand is equivalent to $19,970,000."
+    },
+    {
+      "question_text": "For Peako Limited, what was the value of Total expensed R&D expenditure at the end of the period listed in annual report? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. **Metric Definition:** The question asks for 'Total expensed R&D expenditure' for Peako Limited. This metric represents the total amount of research and development expenses that were incurred and expensed during the period, as opposed to being capitalized. \n2. **Context Examination:** The provided context includes various pages from Peako Limited's annual report, detailing their financial statements, accounting policies, and notes to the financial statements. \n3. **Metric Matching:** Upon reviewing the context, there is no explicit line item or mention of 'Total expensed R&D expenditure' in the provided pages. The context does discuss exploration and evaluation expenditures, which could be related to R&D, but it does not explicitly state the total expensed amount for R&D. \n4. **Value Extraction and Adjustment:** Since the context does not provide a direct value for 'Total expensed R&D expenditure', and given the instructions to not perform calculations or inferences, the answer cannot be derived from the provided information. \n5. **Conclusion:** Given the lack of direct information regarding 'Total expensed R&D expenditure' in the context, the answer must be 'N/A' as per the instructions."
+    },
+    {
+      "question_text": "Did Empire Company Limited announce any changes to its dividend policy in the annual report? If there is no mention, return False.",
+      "kind": "boolean",
+      "value": false,
+      "references": [
+        {
+          "pdf_sha1": "8f5e29eea4f4a3e944707c71148439ca1fd4b2d8",
+          "page_index": 6
+        },
+        {
+          "pdf_sha1": "8f5e29eea4f4a3e944707c71148439ca1fd4b2d8",
+          "page_index": 19
+        },
+        {
+          "pdf_sha1": "8f5e29eea4f4a3e944707c71148439ca1fd4b2d8",
+          "page_index": 92
+        }
+      ],
+      "reasoning_process": "1. The question asks whether Empire Company Limited announced any changes to its dividend policy in the annual report. This requires examining the annual report for any statements regarding changes in dividend policy. 2. The provided text includes various sections of the annual report. However, the key information regarding dividend policy changes would likely be found in sections discussing financial performance, shareholder information, or management's discussion. 3. The sections that could potentially discuss dividend policy include the Message from the President & CEO, the section on Liquidity and Capital Resources, and the Shareholder and Investor Information section. 4. On page 7, a '10% increase in our dividend' is mentioned, suggesting a change in the dividend amount but not necessarily the policy. 5. Page 20 discusses financial results, including a dividend per share increase from $0.52 to $0.60, indicating an increase in the dividend amount but not explicitly stating a policy change. 6. The dividend policy refers to guidelines governing dividend distribution decisions, and without explicit statements about altering these guidelines, it cannot be concluded that the policy has changed."
+    },
+    {
+      "question_text": "Which leadership positions changed at Duni Group in the reporting period? If data is not available, return 'N/A'. Give me the title of the position.",
+      "kind": "names",
+      "value": [
+        "EVP Commercial",
+        "EVP of the BioPak business area",
+        "Senior Advisor"
+      ],
+      "references": [
+        {
+          "pdf_sha1": "e7a45fed0d7ebfd13a524e7fcc443318bac654e2",
+          "page_index": 77
+        },
+        {
+          "pdf_sha1": "e7a45fed0d7ebfd13a524e7fcc443318bac654e2",
+          "page_index": 80
+        },
+        {
+          "pdf_sha1": "e7a45fed0d7ebfd13a524e7fcc443318bac654e2",
+          "page_index": 81
+        }
+      ],
+      "reasoning_process": "1. The question asks for the names of all new executives that took on new leadership positions in the company. 2. The most relevant sections for this question are those that discuss changes in leadership or management, such as the 'Group Management' section on page 78 and the descriptions of the Board of Directors and employee representatives on pages 81 and 82. 3. On page 78, it's mentioned that 'During the year, Group Management, including the CEO, consisted of nine persons.' It also notes that 'In September, the management team underwent a slight reorganization' which included changes such as Manfred Haagarten becoming temporary EVP for all of Commercial, and later this role being made permanent in November. Nicklas Bengtsson became EVP of the BioPak business area, and Mats Lindroth took on a new role as Senior Advisor. 4. The question asks for changes during the reporting period. The changes mentioned on page 78, such as the reorganization in September and the subsequent adjustments, fall within this timeframe. 5. The positions that changed during the reporting period are: - EVP Commercial - EVP of the BioPak business area - Senior Advisor (from a previous executive role) - EVP Strategic Development, IT and Communication (announced departure, implying a future change but not explicitly stated as occurring within the reporting period). 6. Given the information and focusing on the titles of positions that changed, we can list the positions. However, it's crucial to note that the question asks for positions, not names, and we should only include positions that were explicitly mentioned as changing during the reporting period. 7. Based on the analysis, the positions that changed during the reporting period are: - EVP Commercial - EVP of the BioPak business area - Senior Advisor"
+    },
+    {
+      "question_text": "Did SIG plc mention any mergers or acquisitions in the annual report? If there is no mention, return False.",
+      "kind": "boolean",
+      "value": true,
+      "references": [
+        {
+          "pdf_sha1": "2db41ba86cc015db1f5f7de00b764a06e6de3dcc",
+          "page_index": 8
+        },
+        {
+          "pdf_sha1": "2db41ba86cc015db1f5f7de00b764a06e6de3dcc",
+          "page_index": 24
+        }
+      ],
+      "reasoning_process": "1. The question asks if SIG plc mentioned any mergers or acquisitions in their annual report. If there's no mention, the answer should be False. 2. The context provided includes various pages from SIG plc's annual report, covering different topics such as strategic reports, governance, financials, and more. 3. To answer the question, we need to identify if there are any mentions of mergers or acquisitions within the provided context. 4. We should look for key terms like 'mergers,' 'acquisitions,' or any related phrases that might indicate such activities. 5. Upon examining the text, we find mentions of acquisitions in the context. For example, on page 9, it mentions 'Acquisition of Miers Construction Products Limited,' indicating that SIG plc did indeed engage in an acquisition. Furthermore, on page 25, under 'Focused growth,' it talks about 'Acquisitions' as part of their strategy, mentioning 'Five margin accretive acquisitions' and the strategic acquisition of Miers in the UK and Thermodämm in Germany. 6. Given the mentions of acquisitions and the discussion around them as part of SIG plc's strategy and activities, it's clear that the company did mention mergers or acquisitions in their annual report. 7. Since the question asks for a boolean value (True or False) based on whether SIG plc mentioned any mergers or acquisitions, and we have found evidence of such mentions, the final answer should reflect the presence of this information."
+    },
+    {
+      "question_text": "For Pintec Technology Holdings Limited, what was the value of End-of-year net interest margin (NIM) at the end of the period listed in annual report? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. **Metric Definition:** The question asks for 'End-of-year net interest margin (NIM)' for Pintec Technology Holdings Limited. NIM is a measure of the difference between the interest income earned by a financial institution and the amount of interest paid out to their lenders, relative to the amount of their interest-earning assets. 2. **Context Examination:** The provided context includes various financial statements and notes, but none directly mention 'Net Interest Margin' or provide a straightforward calculation for it. 3. **Metric Matching:** There is no direct mention of 'Net Interest Margin' or any explicit calculation that would lead to determining this metric in the context. 4. **Value Extraction and Adjustment:** Given the lack of direct information, calculating NIM would require specific information about interest income and expense, which is not explicitly provided in a manner that directly answers the question. 5. **Confirmation**: Since the information provided does not directly lead to the calculation of the net interest margin and because guessing or inferring the value could lead to inaccuracies, we should not attempt to calculate or guess the NIM."
+    },
+    {
+      "question_text": "For AA Limited, what was the value of Fleet size (vehicles) at year-end at the end of the period listed in annual report? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. **Metric Definition:** The question asks for 'Fleet size (vehicles)' of AA Limited at the year-end. This metric represents the total number of vehicles owned or operated by AA Limited for its operations. 2. **Context Examination:** The provided context includes various financial and operational metrics but does not directly mention 'Fleet size (vehicles)' in a straightforward manner. 3. **Metric Matching:** Upon reviewing the context, there is no direct mention of 'Fleet size (vehicles)' that matches the question's metric. 4. **Value Extraction and Adjustment:** Given that the context does not provide a direct or indirect way to accurately determine the 'Fleet size (vehicles)' without making assumptions or calculations, we must reject the availability of this metric in the provided context. 5. **Confirmation**: Since there's no clear information about the fleet size in the provided context, and deriving or calculating it would require assumptions or additional data not provided, the appropriate response is 'N/A'."
+    },
+    {
+      "question_text": "Did HCA Healthcare, Inc. announce any changes to its dividend policy in the annual report? If there is no mention, return False.",
+      "kind": "boolean",
+      "value": false,
+      "references": [
+        {
+          "pdf_sha1": "a69ebee82a9acd54117407ca3697db0d7bfbfdac",
+          "page_index": 60
+        },
+        {
+          "pdf_sha1": "a69ebee82a9acd54117407ca3697db0d7bfbfdac",
+          "page_index": 131
+        },
+        {
+          "pdf_sha1": "a69ebee82a9acd54117407ca3697db0d7bfbfdac",
+          "page_index": 2
+        }
+      ],
+      "reasoning_process": "1. The question asks if HCA Healthcare, Inc. announced any changes to its dividend policy in the annual report. This requires identifying any statements regarding adjustments to how the company determines and distributes dividends. 2. The provided context includes various pages from the annual report, discussing different aspects of HCA Healthcare, Inc.'s operations, financial performance, and corporate governance. 3. Relevant sections for this question would be found in discussions about dividends or financial policies. 4. An increase in the quarterly dividend is mentioned, indicating a change in the dividend amount but not necessarily the policy. 5. There is no explicit statement about revising the criteria or framework used to determine dividend payments, which would constitute a change in dividend policy."
+    },
+    {
+      "question_text": "Which of the companies had the lowest total assets in EUR at the end of the period listed in annual report: \"Incyte Corporation\", \"INMUNE BIO INC.\", \"Datalogic\", \"Terns Pharmaceuticals, Inc.\", \"RWE AG\"? If data for the company is not available, exclude it from the comparison. If only one company is left, return this company.",
+      "kind": "name",
+      "value": "Datalogic",
+      "references": [
+        {
+          "pdf_sha1": "980742aa08ea64d552c153bcefbd7e8243fb9efd",
+          "page_index": 110
+        },
+        {
+          "pdf_sha1": "980742aa08ea64d552c153bcefbd7e8243fb9efd",
+          "page_index": 39
+        },
+        {
+          "pdf_sha1": "79ffb9b8682aa565172233c070a47d944464644c",
+          "page_index": 136
+        },
+        {
+          "pdf_sha1": "79ffb9b8682aa565172233c070a47d944464644c",
+          "page_index": 161
+        },
+        {
+          "pdf_sha1": "553afbf09b6d83166b17acb02431c6cf38e4defc",
+          "page_index": 47
+        },
+        {
+          "pdf_sha1": "553afbf09b6d83166b17acb02431c6cf38e4defc",
+          "page_index": 0
+        },
+        {
+          "pdf_sha1": "4d3e52b69b4b5366e54ce87cf641b01b1419bdee",
+          "page_index": 83
+        },
+        {
+          "pdf_sha1": "4d3e52b69b4b5366e54ce87cf641b01b1419bdee",
+          "page_index": 87
+        },
+        {
+          "pdf_sha1": "cc0fc5888b99758100a7ff024863fc4337b6b3c5",
+          "page_index": 60
+        },
+        {
+          "pdf_sha1": "cc0fc5888b99758100a7ff024863fc4337b6b3c5",
+          "page_index": 282
+        }
+      ],
+      "reasoning_process": "1. The question asks for the company with the lowest total assets in EUR. \n2. Incyte Corporation, INMUNE BIO INC., and Terns Pharmaceuticals, Inc. are excluded due to their assets being reported in USD without an exchange rate to convert to EUR. \n3. Datalogic's total assets are 845,511,000 EUR. \n4. RWE AG's total assets are 59,245,000,000 EUR. \n5. Comparing the eligible companies, Datalogic has the lowest total assets in EUR. \n6. Therefore, Datalogic is the company with the lowest total assets in EUR. \n7. The comparison is straightforward since only two companies have their assets reported in EUR. \n8. Thus, Datalogic is the answer to the question."
+    },
+    {
+      "question_text": "What was the value of E-commerce active customer accounts of Mosaic Brands Limited at the end of the period listed in annual report? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. **Metric Definition:** The question asks for the 'value of E-commerce active customer accounts' of Mosaic Brands Limited. This metric represents the number of active customer accounts on the company's e-commerce platform at the end of the period. \n2. **Context Examination:** The provided context includes various pages from the annual report, such as pages 41, 40, 8, 11, 57, 99, 9, 10, 81, and 6. However, none of these pages directly mention 'E-commerce active customer accounts.' \n3. **Metric Matching:** Since the context does not explicitly provide the value of 'E-commerce active customer accounts,' we need to determine if any related metrics can be used as a proxy or if the information is not available. \n4. **Value Extraction and Adjustment:** Upon reviewing the context, it appears that the information about 'E-commerce active customer accounts' is not provided. While there are mentions of online sales, digital channels, and customer growth, the specific metric of 'E-commerce active customer accounts' is not mentioned. \n5. **Confirmation:** Given the lack of direct information, we cannot calculate or derive the 'value of E-commerce active customer accounts' from the provided context. Therefore, the answer is 'N/A' due to the unavailability of the required data."
+    },
+    {
+      "question_text": "What was the largest single spending of Toshiba Corporation on executive compensation in AUD? If data is not available in this currency, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. **Metric Definition:** The question asks for the 'largest single spending of Toshiba Corporation on executive compensation' in AUD. This metric represents the highest amount spent by Toshiba Corporation on compensating its executives in Australian Dollars.\n2. **Context Examination:** The provided context includes information about Toshiba Corporation's compensation policy, executive officers, and various financial and non-financial data. However, it does not explicitly mention the compensation amounts in AUD or any direct conversion to AUD.\n3. **Metric Matching:** Upon examining the context, there is no direct mention of executive compensation in AUD. The context provides information on the company's compensation policy and the roles of executive officers but does not specify the currency or the exact amounts spent on executive compensation.\n4. **Value Extraction and Adjustment:** Since the context does not provide any information on executive compensation in AUD, there is no value to extract or adjust.\n5. **Conclusion:** Given the lack of specific information regarding executive compensation in AUD within the provided context, the answer must reflect the unavailability of this data."
+    },
+    {
+      "question_text": "For Sonic Automotive, Inc., what was the value of Year-end fleet average CO₂ emissions at the end of the period listed in annual report? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. **Metric Definition:** The question asks for 'Year-end fleet average CO₂ emissions' for Sonic Automotive, Inc. This metric represents the average carbon dioxide emissions of the company's fleet at the end of the reporting period. \n2. **Context Examination:** The provided context includes various financial statements and discussions, such as the Management's Discussion and Analysis of Financial Condition and Results of Operations, Consolidated Balance Sheets, and Notes to Consolidated Financial Statements. However, none of these sections directly mention 'Year-end fleet average CO₂ emissions'. \n3. **Metric Matching:** Upon reviewing the context, there is no line item, section, or mention of 'Year-end fleet average CO₂ emissions' or any equivalent metric that directly matches the concept requested in the question. \n4. **Data Availability:** The context does not provide the specific data required to calculate or infer the 'Year-end fleet average CO₂ emissions'. \n5. **Conclusion:** Given the lack of direct or indirect information regarding 'Year-end fleet average CO₂ emissions' in the provided context, the answer must be 'N/A' as the data is not available."
+    },
+    {
+      "question_text": "Did Wheeler Real Estate Investment Trust, Inc. report any changes to its capital structure? If there is no mention, return False.",
+      "kind": "boolean",
+      "value": true,
+      "references": [
+        {
+          "pdf_sha1": "b947c33b370d8a3251ef9c36ce7d71e8d16f4f8e",
+          "page_index": 36
+        },
+        {
+          "pdf_sha1": "b947c33b370d8a3251ef9c36ce7d71e8d16f4f8e",
+          "page_index": 37
+        }
+      ],
+      "reasoning_process": "1. To answer this question, we need to examine the provided text from the annual report of Wheeler Real Estate Investment Trust, Inc. to determine if there were any changes to its capital structure. \n2. The capital structure of a company refers to the way it finances its operations through a combination of debt and equity. Changes in capital structure can include issuing new debt or equity, retiring existing debt or equity, or any other adjustments that alter the company's debt-to-equity ratio. \n3. The text includes various sections from the company's annual report, such as the balance sheet, statements of operations, and notes to the financial statements. We need to look for sections that discuss changes in the company's debt or equity. \n4. The Consolidated Balance Sheets (page 37) show the company's assets, liabilities, and equity at the end of the reporting period. Comparing the 2022 and 2021 balances can indicate changes in the capital structure. \n5. The company's Loans Payable, net increased from $333,283 thousand in 2021 to $466,029 thousand in 2022, as seen on the balance sheet. This indicates an increase in debt. The Series B Convertible Preferred Stock increased from $41,189 thousand in 2021 to $44,911 thousand in 2022, and the number of shares outstanding also increased. This suggests an increase in this component of equity. \nThe Common Stock and Additional Paid-in Capital show minimal changes, which might not significantly impact the overall capital structure. The Noncontrolling Interests increased substantially, which could be due to changes in the ownership structure of subsidiaries or other factors affecting the company's capital structure. \nBased on the information provided, there were changes in Wheeler Real Estate Investment Trust, Inc.'s capital structure, including an increase in debt (loans payable) and changes in certain components of equity (Series B Convertible Preferred Stock and noncontrolling interests)."
+    },
+    {
+      "question_text": "For Atreca, Inc., what was the value of Number of managed clinics at year-end at the end of the period listed in annual report? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. **Metric Definition:** The question asks for the 'Number of managed clinics at year-end' for Atreca, Inc. This metric represents the total count of clinics managed by the company at the end of the reporting period. \n2. **Context Examination:** The provided context includes various financial statements and notes from Atreca, Inc.'s annual report, such as the Balance Sheets, Statements of Operations, and Notes to Financial Statements. However, none of these sections directly mention 'managed clinics' or provide a clear indication of what constitutes a 'managed clinic' in the context of Atreca, Inc.'s business. \n3. **Metric Matching:** Upon reviewing the context, there is no line item, section, or mention of 'Number of managed clinics' or any equivalent metric that directly matches the concept requested in the question. \n4. **Data Availability:** Given the information provided in the context, there is no data available that directly corresponds to the 'Number of managed clinics at year-end.' The context primarily focuses on financial performance, lease agreements, stock options, and other corporate matters, without discussing operational metrics like the number of managed clinics. \n5. **Conclusion:** Since the context does not provide the requested metric or any equivalent information, and there's no indication that such data is available or relevant to Atreca, Inc.'s business as described, the answer must reflect the unavailability of this specific data."
+    },
+    {
+      "question_text": "Which leadership positions changed at Crombie REIT in the reporting period? If data is not available, return 'N/A'. Give me the title of the position.",
+      "kind": "names",
+      "value": [
+        "President and Chief Executive Officer"
+      ],
+      "references": [
+        {
+          "pdf_sha1": "14fa568899745270c4ff2c10073f97f2c2e7764b",
+          "page_index": 3
+        },
+        {
+          "pdf_sha1": "14fa568899745270c4ff2c10073f97f2c2e7764b",
+          "page_index": 5
+        },
+        {
+          "pdf_sha1": "14fa568899745270c4ff2c10073f97f2c2e7764b",
+          "page_index": 6
+        },
+        {
+          "pdf_sha1": "14fa568899745270c4ff2c10073f97f2c2e7764b",
+          "page_index": 131
+        }
+      ],
+      "reasoning_process": "1. The question asks for the leadership positions that changed at Crombie REIT in the reporting period. \n2. The reporting period is not explicitly stated in the question, but based on the context, it appears to be 2022, as mentioned in the annual report. \n3. On page 7, it is mentioned that Mark Holly became Crombie's President and CEO after Don Clow's retirement, effective the end of February 2023. \n4. This indicates a change in the position of President and CEO. \n5. On page 6, it is mentioned that Don Clow retired as President and CEO, and Mark Holly took over as the new President and CEO. \n6. On page 4, it is mentioned that the Board began an extensive review of senior management roles, structure, and succession planning in 2021, and Mark Holly was identified as the successor to Don Clow. \n7. Based on the information provided, the position of President and CEO changed, with Mark Holly taking over from Don Clow. \n8. Additionally, on page 4, it is mentioned that Michael Waters and Heidi Jamieson-Mills were added to the Board of Trustees in 2022, but it does not explicitly state that their additions were due to changes in leadership positions. \n9. However, on page 132, it is mentioned that Mark Holly is a Trustee, President, and Chief Executive Officer, indicating that he holds multiple positions. \n10. Considering the information provided, the position of President and CEO is the only explicitly mentioned change in leadership position."
+    },
+    {
+      "question_text": "Did Mosaic Brands Limited mention any mergers or acquisitions in the annual report? If there is no mention, return False.",
+      "kind": "boolean",
+      "value": true,
+      "references": [
+        {
+          "pdf_sha1": "12bff07b957b1c8f8cad9d917ca18005720cce9b",
+          "page_index": 39
+        },
+        {
+          "pdf_sha1": "12bff07b957b1c8f8cad9d917ca18005720cce9b",
+          "page_index": 28
+        }
+      ],
+      "reasoning_process": "1. The question asks if Mosaic Brands Limited mentioned any mergers or acquisitions in their annual report. \n2. The text provided includes various sections from the annual report. \n3. On page 40, under 'SIGNIFICANT CHANGES IN THE STATE OF AFFAIRS,' there's a mention of the 'EziBuy acquisition.' \n4. This indicates that Mosaic Brands Limited did mention an acquisition in the annual report, specifically the acquisition of EziBuy. \n5. Therefore, the answer to the question is not False but rather an affirmation of the mention of such an event."
+    },
+    {
+      "question_text": "Did Incitec Pivot Limited detail any restructuring plans in the latest filing? If there is no mention, return False.",
+      "kind": "boolean",
+      "value": true,
+      "references": [
+        {
+          "pdf_sha1": "6529fba868216a923407fb0d4e15a811a8e89ebc",
+          "page_index": 21
+        },
+        {
+          "pdf_sha1": "6529fba868216a923407fb0d4e15a811a8e89ebc",
+          "page_index": 99
+        }
+      ],
+      "reasoning_process": "1. The question asks if Incitec Pivot Limited detailed any restructuring plans in the latest filing, which requires looking for mentions of plans to reorganize or restructure the company. 2. The provided text from the annual report includes sections such as the financial report and discussions on capital structure, where keywords related to restructuring should be identified. 3. Upon reviewing the text, mentions of strategic reviews and changes are found, particularly in the section discussing the operating and financial review (page 22), indicating a strategic review of WALA and implications for the structural separation of the Explosives and Fertilisers businesses. 4. This information suggests that the company is considering or planning some form of restructuring or reorganization. 5. The presence of information related to restructuring plans in the annual report directly answers the question, indicating that such plans are indeed mentioned."
+    },
+    {
+      "question_text": "What was the value of Number of active software licenses of Rapid7 at the end of the period listed in annual report? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. **Metric Definition:** The question asks for the 'Number of active software licenses' of Rapid7 at the end of the period listed in the annual report. This metric represents the total count of active licenses for Rapid7's software products. \n2. **Context Examination:** The provided context includes various pages from the annual report, such as the letter to stockholders, executive leadership, and financial information. However, none of these pages directly mention 'Number of active software licenses'. \n3. **Metric Matching:** Upon reviewing the context, there is no line item, section, or mention of 'Number of active software licenses' that matches the concept requested in the question. \n4. **Value Extraction and Adjustment:** Since the context does not provide the 'Number of active software licenses', there is no value to extract or adjust. \n5. **Confirmation**: The question specifically asks for the 'Number of active software licenses', which is not available in the provided context. Therefore, the answer is 'N/A'."
+    },
+    {
+      "question_text": "Which leadership positions changed at Wheeler Real Estate Investment Trust, Inc. in the reporting period? If data is not available, return 'N/A'. Give me the title of the position.",
+      "kind": "names",
+      "value": [
+        "Chief Executive Officer",
+        "Chief Financial Officer"
+      ],
+      "references": [
+        {
+          "pdf_sha1": "b947c33b370d8a3251ef9c36ce7d71e8d16f4f8e",
+          "page_index": 5
+        },
+        {
+          "pdf_sha1": "b947c33b370d8a3251ef9c36ce7d71e8d16f4f8e",
+          "page_index": 45
+        },
+        {
+          "pdf_sha1": "b947c33b370d8a3251ef9c36ce7d71e8d16f4f8e",
+          "page_index": 86
+        },
+        {
+          "pdf_sha1": "b947c33b370d8a3251ef9c36ce7d71e8d16f4f8e",
+          "page_index": 88
+        },
+        {
+          "pdf_sha1": "b947c33b370d8a3251ef9c36ce7d71e8d16f4f8e",
+          "page_index": 40
+        }
+      ],
+      "reasoning_process": "To answer the question, we need to identify any changes in leadership positions at Wheeler Real Estate Investment Trust, Inc. in the reporting period. We can start by looking at the 'Information About our Executive Officers' section on page 6 of the annual report. This section lists the current executive officers of the company, including their positions and tenure. We can also look at the 'Notes to Consolidated Financial Statements' section on page 46, which includes information about the company's corporate general and administrative expenses, including professional fees and compensation and benefits. Additionally, we can examine the 'Certification of Chief Executive Officer' and 'Certification of Chief Financial Officer' sections on pages 87 and 89, respectively, which provide information about the company's leadership and their certifications. We can also look at the 'Acquisition of Cedar Realty Trust' section on page 41, which discusses the company's acquisition of Cedar Realty Trust and the changes in leadership that resulted from it. By analyzing these sections, we can identify any changes in leadership positions at Wheeler Real Estate Investment Trust, Inc. in the reporting period."
+    },
+    {
+      "question_text": "Did Aptevo Therapeutics Inc. mention any mergers or acquisitions in the annual report? If there is no mention, return False.",
+      "kind": "boolean",
+      "value": false,
+      "references": [
+        {
+          "pdf_sha1": "0981826b4b43a88920f3e01c71ae73539bab84cc",
+          "page_index": 1
+        },
+        {
+          "pdf_sha1": "0981826b4b43a88920f3e01c71ae73539bab84cc",
+          "page_index": 23
+        },
+        {
+          "pdf_sha1": "0981826b4b43a88920f3e01c71ae73539bab84cc",
+          "page_index": 65
+        },
+        {
+          "pdf_sha1": "0981826b4b43a88920f3e01c71ae73539bab84cc",
+          "page_index": 66
+        },
+        {
+          "pdf_sha1": "0981826b4b43a88920f3e01c71ae73539bab84cc",
+          "page_index": 77
+        },
+        {
+          "pdf_sha1": "0981826b4b43a88920f3e01c71ae73539bab84cc",
+          "page_index": 80
+        },
+        {
+          "pdf_sha1": "0981826b4b43a88920f3e01c71ae73539bab84cc",
+          "page_index": 83
+        },
+        {
+          "pdf_sha1": "0981826b4b43a88920f3e01c71ae73539bab84cc",
+          "page_index": 89
+        }
+      ],
+      "reasoning_process": "1. The question asks if Aptevo Therapeutics Inc. mentioned any mergers or acquisitions in their annual report. To answer this, we need to analyze the provided text carefully. \n2. The analysis involves understanding the question, which is about whether there were any mergers or acquisitions mentioned, and then looking for relevant keywords like 'merger,' 'acquisition,' 'sale,' or 'purchase' in the text.\n3. We identify relevant sections in the annual report, including the table of contents, notes to consolidated financial statements, management's discussion and analysis, and exhibits, to find any mentions of mergers or acquisitions.\n4. Upon reviewing the pages, we find that page 66 mentions the sale of Aptevo BioTherapeutics LLC to Medexus in February 2020, which is a significant transaction but from the perspective of Aptevo Therapeutics Inc. as the seller, not the buyer, and thus does not constitute a merger or acquisition by the company itself.\n5. The conclusion is that while there is a mention of a sale, which could be considered an acquisition from the buyer's perspective, there is no mention of Aptevo Therapeutics Inc. being involved in a merger or acquisition as the acquiring party during the period covered by the annual report."
+    },
+    {
+      "question_text": "According to the annual report, what is the Cash flow from operations (in GBP) for James Halstead plc  (within the last period or at the end of the last period)? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": 6535000,
+      "references": [
+        {
+          "pdf_sha1": "71d137454a1524843e1f49b34603438510232919",
+          "page_index": 36
+        },
+        {
+          "pdf_sha1": "71d137454a1524843e1f49b34603438510232919",
+          "page_index": 54
+        }
+      ],
+      "reasoning_process": "1. The question asks for the ‘Cash flow from operations’ for James Halstead plc, specifically requesting the operating cash flow figure for the most recent period (the period ended 30 June 2022). 2. In the provided context, the Consolidated Cash Flow Statement on page 37 contains a line labeled ‘Cash inflow from operating activities’ which directly corresponds to the operating cash flow. 3. The statement shows that for the year ended 30 June 2022, the ‘Cash inflow from operating activities’ is 6,535. 4. It is important to note that the report’s figures are presented in thousands, as confirmed by related sections on pages 55 and 51, where amounts are specified as ‘£'000’. 5. Therefore, the value 6,535 represents 6,535,000 GBP. 6. No calculations beyond the unit conversion (multiplying by 1,000) are required. The metric’s meaning exactly matches the target metric requested in the question."
+    },
+    {
+      "question_text": "What was the value of End-of-year tech staff headcount of archTIS Limited at the end of the period listed in annual report? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. **Metric Definition:** The question asks for the 'End-of-year tech staff headcount' of 'archTIS Limited' at the end of the period listed in the annual report. This metric represents the number of technical staff employed by the company at the end of the reporting period. \n2. **Context Examination:** The provided context includes various pages from the annual report, such as pages 59, 3, 9, 2, 49, 19, 84, 25, 24, 16, 29, and 57. However, none of these pages directly mention the 'End-of-year tech staff headcount'. \n3. **Metric Matching:** Upon reviewing the context, there is no line item, section, or mention of 'End-of-year tech staff headcount' or any equivalent metric that directly matches the concept requested in the question. \n4. **Value Extraction and Adjustment:** Since the context does not provide a direct or indirect way to calculate the 'End-of-year tech staff headcount', no value can be extracted or adjusted. \n5. **Confirmation:** Given the lack of relevant information, the answer must be 'N/A' as per the instructions when the metric is not directly stated in the context."
+    },
+    {
+      "question_text": "For Westwater Resources, Inc., what was the value of Percentage of renewable energy capacity at the end of the period listed in annual report? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. **Metric Definition:** The question asks for the 'Percentage of renewable energy capacity' for Westwater Resources, Inc. at the end of the period. This metric represents the proportion of the company's energy capacity that comes from renewable sources. \n2. **Context Examination:** The provided context includes various pages from the company's annual report, covering topics such as the company's description, risk factors, financial statements, and more. However, none of these pages directly mention 'Percentage of renewable energy capacity'. \n3. **Metric Matching:** Since the context does not explicitly mention 'Percentage of renewable energy capacity', we must consider whether any related metrics could serve as a proxy or provide insight. However, the question specifically asks for this metric, and without direct mention or a clear proxy, we cannot accurately determine this value. \n4. **Value Extraction and Adjustment:** Given that the metric is not directly mentioned in the provided context, there is no value to extract or adjust. \n5. **Confirmation:** The lack of direct mention or a suitable proxy in the context means we cannot confirm the value of 'Percentage of renewable energy capacity' for Westwater Resources, Inc."
+    },
+    {
+      "question_text": "Which leadership positions changed at Origin Bancorp, Inc. in the reporting period? If data is not available, return 'N/A'. Give me the title of the position.",
+      "kind": "names",
+      "value": [
+        "Chief Accounting Officer"
+      ],
+      "references": [
+        {
+          "pdf_sha1": "3f36d4f26ada778d89cf5a7344be0b9e9a5223a3",
+          "page_index": 58
+        },
+        {
+          "pdf_sha1": "3f36d4f26ada778d89cf5a7344be0b9e9a5223a3",
+          "page_index": 68
+        }
+      ],
+      "reasoning_process": "1. The question asks specifically for the leadership positions that changed at Origin Bancorp, Inc. during the reporting period, and it requests the title of the position. 2. I first reviewed the context provided from multiple pages of the annual report to identify any noted changes in leadership roles. 3. In examining the text from the company’s compensation discussion, I noted that Stephen Brolly is listed as 'Senior Executive Officer and Chief Accounting Officer (former Chief Financial Officer).' 4. Further inspection revealed the explanation that effective August 8, 2022, Mr. Brolly transitioned from his former role as Chief Financial Officer to become the Chief Accounting Officer. 5. This is the clear change in a leadership position during the reporting period. 6. I also reviewed other excerpts regarding executive roles but did not find any additional leadership position changes documented for the period. 7. Based on this analysis, the only leadership position change was the transition to the role of Chief Accounting Officer."
+    },
+    {
+      "question_text": "What was the Gross margin (%) for Ritchie Bros. Auctioneers Incorporated according to the annual report (within the last period or at the end of the last period)? If data is not available, return 'N/A'.",
+      "kind": "number",
+      "value": "N/A",
+      "references": [],
+      "reasoning_process": "1. **Metric Definition:** The question asks for 'Gross margin (%)' for Ritchie Bros. Auctioneers Incorporated. 'Gross margin (%)' represents the percentage of revenue that remains after deducting the cost of goods sold from the total revenue. 2. **Context Examination:** The context includes various financial discussions but lacks a direct statement of 'Gross margin (%)' or its components. 3. **Metric Matching:** No direct match for 'Gross margin (%)' or its necessary components (total revenue and cost of goods sold) is found in the provided context. 4. **Value Extraction and Adjustment:** Since the context does not provide the necessary information to calculate 'Gross margin (%)' directly or indirectly without assumptions, we cannot proceed with calculations. 5. **Confirmation**: The lack of explicit information or calculable components for 'Gross margin (%)' in the context leads to the conclusion that the answer is 'N/A'."
+    }
+  ],
+  "team_email": "79250515615@yandex.com",
+  "submission_name": "Ilia Ris v.6",
+  "details": "Custom pdf parsing + vDB + Router + Parent Document Retrieval + SO CoT + SO reparser; IBM WatsonX llm = llama-3.3-70b-instruct"
+}

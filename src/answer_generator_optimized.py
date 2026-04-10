@@ -2,17 +2,19 @@
 Optimized answer generation with multi-round verification and citation validation
 """
 import json
-from typing import List, Dict, Optional, Tuple
+from typing import Any, List, Dict, Optional, Tuple
 from dataclasses import dataclass
 from openai import OpenAI
 from dotenv import load_dotenv
 import os
 import re
 
+from src.route_config import RouteUsageStats
+
 
 @dataclass
 class AnswerValidationResult:
-    """答案验证结果"""
+    """See implementation."""
     is_valid: bool
     issues: List[str]
     confidence: float
@@ -21,7 +23,7 @@ class AnswerValidationResult:
 
 @dataclass
 class GeneratedAnswer:
-    """生成的答案"""
+    """See implementation."""
     answer: str
     reasoning: str
     citations: List[Dict]
@@ -29,26 +31,34 @@ class GeneratedAnswer:
     validation_passed: bool
 
 
+def _normalize_answer_text_for_verify(answer_text) -> str:
+    """Structured outputs may return dict/list for answer; citation check needs a string."""
+    if answer_text is None:
+        return ""
+    if isinstance(answer_text, str):
+        return answer_text
+    if isinstance(answer_text, (int, float, bool)):
+        return str(answer_text)
+    if isinstance(answer_text, dict):
+        return json.dumps(answer_text, ensure_ascii=False)
+    if isinstance(answer_text, list):
+        return json.dumps(answer_text, ensure_ascii=False)
+    return str(answer_text)
+
+
 class AnswerGeneratorOptimized:
-    """优化的答案生成器，支持多轮验证和引用验证"""
-    
+    """See implementation."""
+
     def __init__(
         self,
         model: str = "gpt-4o-2024-08-06",
         verification_model: str = "gpt-4o-mini-2024-07-18",
         temperature: float = 0.3,
         max_verification_rounds: int = 2,
-        domain: str = "general"
+        domain: str = "general",
+        usage_stats: Optional[RouteUsageStats] = None,
     ):
-        """
-        初始化答案生成器
-        
-        Args:
-            model: 主生成模型
-            verification_model: 验证模型
-            temperature: 生成温度
-            max_verification_rounds: 最大验证轮数
-        """
+        """See implementation."""
         load_dotenv()
         api_key = os.getenv("OPENAI_API_KEY")
         base_url = os.getenv("OPENAI_BASE_URL")
@@ -61,6 +71,7 @@ class AnswerGeneratorOptimized:
         self.temperature = temperature
         self.max_verification_rounds = max_verification_rounds
         self.domain = (domain or "general").lower()
+        self.usage_stats = usage_stats
 
     def _domain_instruction(self) -> str:
         if self.domain != "finance":
@@ -74,74 +85,88 @@ class AnswerGeneratorOptimized:
             "- 若上下文没有直接给出目标指标，返回\"信息不足\"。\n"
             "- 不做推导计算，不用外部知识补全。"
         )
-    
+
+    def _schema_instruction(self, schema: str) -> str:
+        """See implementation."""
+        s = (schema or "text").lower()
+        if s == "boolean":
+            return (
+                "\n【本题类型：判断题】\n"
+                "- 最终答案 answer 必须是 JSON 布尔：true 或 false。\n"
+                "- 对「是否提及 / 是否报告 / 是否披露 / 并购或收购 / 资本结构变化」等："
+                "若上下文存在与问题实质相关的披露（含正文叙述、交易或债务/股权安排描述、脚注），应回答 true；"
+                "仅当上下文确实不包含此类信息、或问题所指的窄定义在上下文中明确不成立时再答 false。\n"
+                "- 不要仅因没有与问题用词完全相同的章节标题就答 false。\n"
+            )
+        if s == "number":
+            return (
+                "\n【本题类型：数值题】\n"
+                "- answer 优先给出单一数字；若只能区间或近似，在 reasoning 说明并在 answer 给出最接近的可解析数字或\"信息不足\"。\n"
+            )
+        if s in ("name", "names"):
+            return (
+                "\n【本题类型：名称题】\n"
+                "- answer 使用与公司名或题干要求一致的简短实体，避免冗长解释。\n"
+            )
+        return ""
+
     def generate_answer(
         self,
         query: str,
         context: List[Dict],
         schema: str = "text"
     ) -> GeneratedAnswer:
-        """
-        生成答案（带多轮验证）
-        
-        Args:
-            query: 用户问题
-            context: 检索到的上下文
-            schema: 答案格式类型
-            
-        Returns:
-            生成的答案对象
-        """
-        # 第一轮：生成初始答案
+        """See implementation."""
+
         initial_answer = self._generate_initial_answer(query, context, schema)
-        
-        # 多轮验证和重写
+
+
         current_answer = initial_answer
         for round_num in range(self.max_verification_rounds):
-            # 验证答案
+
             validation = self._validate_answer(
                 query, current_answer, context
             )
-            
+
             if validation.is_valid:
                 break
-            
-            # 如果验证不通过，重写答案
+
+
             if round_num < self.max_verification_rounds - 1:
                 current_answer = self._rewrite_answer(
-                    query, current_answer, context, validation
+                    query, current_answer, context, validation, schema
                 )
-        
-        # 最终验证引用
+
+
         validated_citations = self._validate_citations(
             current_answer, context
         )
-        
+
         return GeneratedAnswer(
-            answer=current_answer['answer'],
+            answer=_normalize_answer_text_for_verify(current_answer.get("answer")),
             reasoning=current_answer['reasoning'],
             citations=validated_citations,
             confidence=validation.confidence if 'validation' in locals() else 0.8,
             validation_passed=validation.is_valid if 'validation' in locals() else True
         )
-    
+
     def _generate_initial_answer(
         self,
         query: str,
         context: List[Dict],
         schema: str
     ) -> Dict:
-        """生成初始答案"""
-        # 构建提示
+        """See implementation."""
+
         context_text = self._format_context(context)
-        
+
         system_prompt = """你是一个专业的问答助手。基于提供的上下文回答问题。
 要求：
 1. 答案必须基于上下文，不要引入外部知识
 2. 提供清晰的推理过程
 3. 标注信息来源（页码）
 4. 如果上下文不足以回答问题，明确说明"信息不足"
-5. 对于数字类问题，确保数值准确""" + self._domain_instruction()
+5. 对于数字类问题，确保数值准确""" + self._domain_instruction() + self._schema_instruction(schema)
 
         user_prompt = f"""上下文：
 {context_text}
@@ -164,27 +189,19 @@ class AnswerGeneratorOptimized:
             ],
             response_format={"type": "json_object"}
         )
-        
+        if self.usage_stats:
+            self.usage_stats.record_answer_generation()
+
         result = json.loads(response.choices[0].message.content)
         return result
-    
+
     def _validate_answer(
         self,
         query: str,
         answer: Dict,
         context: List[Dict]
     ) -> AnswerValidationResult:
-        """
-        验证答案质量
-        
-        Args:
-            query: 原始问题
-            answer: 生成的答案
-            context: 上下文
-            
-        Returns:
-            验证结果
-        """
+        """See implementation."""
         system_prompt = """你是一个答案质量评估专家。评估答案是否符合以下标准：
 1. 准确性：答案是否与上下文一致
 2. 完整性：是否回答了问题的所有部分
@@ -201,7 +218,7 @@ class AnswerGeneratorOptimized:
 
         user_prompt = f"""问题：{query}
 
-答案：{answer['answer']}
+答案：{_normalize_answer_text_for_verify(answer.get("answer"))}
 
 推理过程：{answer['reasoning']}
 
@@ -221,7 +238,9 @@ class AnswerGeneratorOptimized:
             ],
             response_format={"type": "json_object"}
         )
-        
+        if self.usage_stats:
+            self.usage_stats.record_verification()
+
         result = json.loads(response.choices[0].message.content)
         return AnswerValidationResult(
             is_valid=result.get('is_valid', True),
@@ -229,25 +248,26 @@ class AnswerGeneratorOptimized:
             confidence=result.get('confidence', 0.8),
             suggestions=result.get('suggestions', [])
         )
-    
+
     def _rewrite_answer(
         self,
         query: str,
         current_answer: Dict,
         context: List[Dict],
-        validation: AnswerValidationResult
+        validation: AnswerValidationResult,
+        schema: str = "text",
     ) -> Dict:
-        """根据验证结果重写答案"""
+        """See implementation."""
         system_prompt = """你是一个答案重写专家。根据验证反馈改进答案。
 要求：
 1. 解决所有指出的问题
 2. 确保答案基于上下文
 3. 保持推理过程的清晰性
-4. 准确标注引用来源""" + self._domain_instruction()
+4. 准确标注引用来源""" + self._domain_instruction() + self._schema_instruction(schema)
 
         user_prompt = f"""问题：{query}
 
-当前答案：{current_answer['answer']}
+当前答案：{_normalize_answer_text_for_verify(current_answer.get("answer"))}
 
 验证反馈：
 - 问题：{validation.issues}
@@ -272,110 +292,104 @@ class AnswerGeneratorOptimized:
             ],
             response_format={"type": "json_object"}
         )
-        
+        if self.usage_stats:
+            self.usage_stats.record_answer_rewrite()
+
         return json.loads(response.choices[0].message.content)
-    
+
     def _validate_citations(
         self,
         answer: Dict,
         context: List[Dict]
     ) -> List[Dict]:
-        """
-        验证引用的准确性
-        
-        Args:
-            answer: 答案数据
-            context: 上下文
-            
-        Returns:
-            验证后的引用列表
-        """
+        """See implementation."""
         citations = answer.get('citations', [])
         validated_citations = []
-        
+
         for citation in citations:
-            # 提取页码
+
             page_num = self._extract_page_number(citation)
             if page_num is None:
                 continue
-            
-            # 查找对应页面
+
+
             page_context = self._find_page_context(page_num, context)
             if page_context is None:
                 continue
-            
-            # 验证引用内容是否确实在页面中
+
+
             is_valid = self._verify_citation_content(
-                answer['answer'], page_context
+                answer.get("answer"), page_context
             )
-            
+
             validated_citations.append({
                 'page': page_num,
                 'is_valid': is_valid,
                 'context_snippet': page_context[:200] if page_context else ""
             })
-        
+
         return validated_citations
-    
+
     def _extract_page_number(self, citation) -> Optional[int]:
-        """从引用中提取页码"""
+        """See implementation."""
         if isinstance(citation, int):
             return citation
         if isinstance(citation, str):
-            # 尝试提取数字
+
             numbers = re.findall(r'\d+', citation)
             if numbers:
                 return int(numbers[0])
         return None
-    
+
     def _find_page_context(self, page_num: int, context: List[Dict]) -> Optional[str]:
-        """查找指定页面的上下文"""
+        """See implementation."""
         for doc in context:
             if doc.get('page') == page_num:
                 return doc.get('text', '')
         return None
-    
+
     def _verify_citation_content(
         self,
-        answer_text: str,
+        answer_text: Any,
         page_context: str
     ) -> bool:
-        """验证答案内容是否在页面上下文中"""
-        # 提取答案中的关键信息
+        """See implementation."""
+        answer_text = _normalize_answer_text_for_verify(answer_text)
+
         key_phrases = self._extract_key_phrases(answer_text)
-        
-        # 检查关键信息是否在页面中
+
+
         for phrase in key_phrases:
             if phrase.lower() in page_context.lower():
                 return True
-        
+
         return False
-    
+
     def _extract_key_phrases(self, text: str) -> List[str]:
-        """提取文本中的关键短语"""
-        # 简单的实现：提取数字、专有名词等
-        # 实际应用中可以使用NLP工具
+        """See implementation."""
+
+
         phrases = []
-        
-        # 提取数字
+
+
         numbers = re.findall(r'\d+(?:,\d{3})*(?:\.\d+)?', text)
         phrases.extend(numbers)
-        
-        # 提取引号中的内容
+
+
         quotes = re.findall(r'"([^"]+)"', text)
         phrases.extend(quotes)
-        
+
         return phrases
-    
+
     def _format_context(self, context: List[Dict]) -> str:
-        """格式化上下文"""
+        """See implementation."""
         formatted = []
         for i, doc in enumerate(context, 1):
             formatted.append(f"【文档{i}】页码：{doc.get('page', 'N/A')}\n{doc.get('text', '')}")
         return "\n\n".join(formatted)
-    
+
     def _format_context_summary(self, context: List[Dict]) -> str:
-        """格式化上下文摘要"""
+        """See implementation."""
         summaries = []
         for doc in context:
             text = doc.get('text', '')
@@ -385,82 +399,56 @@ class AnswerGeneratorOptimized:
 
 
 class SelfConsistencyChecker:
-    """自一致性检查器"""
-    
+    """See implementation."""
+
     def __init__(self, generator: AnswerGeneratorOptimized, num_samples: int = 3):
-        """
-        初始化自一致性检查器
-        
-        Args:
-            generator: 答案生成器
-            num_samples: 采样次数
-        """
+        """See implementation."""
         self.generator = generator
         self.num_samples = num_samples
-    
+
     def generate_with_self_consistency(
         self,
         query: str,
         context: List[Dict]
     ) -> GeneratedAnswer:
-        """
-        使用自一致性生成答案
-        
-        Args:
-            query: 用户问题
-            context: 上下文
-            
-        Returns:
-            最一致的答案
-        """
-        # 生成多个答案
+        """See implementation."""
+
         answers = []
         for _ in range(self.num_samples):
             answer = self.generator.generate_answer(query, context)
             answers.append(answer)
-        
-        # 选择最一致的答案
+
+
         best_answer = self._select_most_consistent(answers)
-        
+
         return best_answer
-    
+
     def _select_most_consistent(
         self,
         answers: List[GeneratedAnswer]
     ) -> GeneratedAnswer:
-        """选择最一致的答案"""
-        # 简单的实现：选择置信度最高的
-        # 实际应用中可以使用更复杂的投票机制
+        """See implementation."""
+
+
         return max(answers, key=lambda x: x.confidence)
 
 
-# 便捷函数
+
 def generate_answer_optimized(
     query: str,
     context: List[Dict],
     use_verification: bool = True,
     use_self_consistency: bool = False
 ) -> Dict:
-    """
-    生成优化后的答案（便捷函数）
-    
-    Args:
-        query: 用户问题
-        context: 上下文
-        use_verification: 是否使用验证
-        use_self_consistency: 是否使用自一致性
-        
-    Returns:
-        答案字典
-    """
+    """See implementation."""
     generator = AnswerGeneratorOptimized()
-    
+
     if use_self_consistency:
         checker = SelfConsistencyChecker(generator)
         result = checker.generate_with_self_consistency(query, context)
     else:
         result = generator.generate_answer(query, context)
-    
+
     return {
         'answer': result.answer,
         'reasoning': result.reasoning,

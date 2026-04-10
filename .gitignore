@@ -1,12 +1,3 @@
-data/erc2_set/pdf_reports/
-data/erc2_set/debug_data/
-data/erc2_set/databases/
-data/erc2_set/databases_ser_tab/
-
-data/test_set/debug_data
-data/test_set/databases
-data/test_set/databases_ser_tab
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -174,11 +165,49 @@ cython_debug/
 _upstream_source/
 _challenge_source/
 
-# Local benchmark artifacts
-data/benchmark_round1_*/
-data/benchmark_*/
+# Dataset heavy / reproducible assets (JSON metadata + README can stay tracked)
+data/datasets/**/databases/
+data/datasets/**/*.faiss
+data/datasets/**/*.pkl
+data/datasets/**/*.zip
+data/datasets/_backup*.json
+# PDFs except small test_set samples used in README smoke flows
+data/datasets/**/pdf_reports/
+!data/datasets/test_set/pdf_reports/
+!data/datasets/test_set/pdf_reports/**
+
+# Large / redundant benchmark experiment trees (keep README + scripts to rebuild)
+data/datasets/benchmark_round1_full/
+data/datasets/benchmark_merged_125_rand30_*/
+data/datasets/benchmark_answerable_*/
+data/datasets/benchmark_merged_140_grid_smoke35/
+data/datasets/benchmark_merged_140_rand10/
+data/datasets/benchmark_round1_soft/
+data/datasets/benchmark_round1_smoke_sample/
+data/datasets/erc2_smoke_sample/
+
+# benchmark_merged_140: no backups or model answer dumps
+data/datasets/benchmark_merged_140/_backup*/
+
+# Answer / report artifacts (not gold_answers.json); keep erc2 reference submissions + test_set refs
+data/datasets/**/answers_*.json
+!data/datasets/erc2_set/answers_*.json
+!data/datasets/test_set/answers_max_nst_o3m.json
+!data/datasets/test_set/answers_max_nst_o3m_debug.json
+data/datasets/**/*comparison_report.json
+data/datasets/**/*baseline_vs_new*.json
+data/datasets/**/*_debug.json
+!data/datasets/test_set/answers_max_nst_o3m_debug.json
+data/datasets/**/*_route_usage.json
+data/datasets/**/triple_runs/
+data/datasets/**/*mismatches.json
+data/datasets/**/*ab_report*.json
+data/datasets/**/*retrieval_param*.json
+
+# Internal session notes (omit from remote if you prefer; remove these lines to track)
+docs/SESSION_HANDOFF.md
 
 # Local run outputs
-data/test_set/answers_base*.json
-data/test_set/answers_full_context_smoke*.json
-data/test_set/answers_finance_vertical*.json
+data/datasets/test_set/answers_base*.json
+data/datasets/test_set/answers_full_context_smoke*.json
+data/datasets/test_set/answers_finance_vertical*.json

@@ -4,12 +4,20 @@
 
 ## 核心增强
 
-- 查询改写（Query Rewrite）
-- 多轮会话记忆
-- 答案与上下文相似度校验
-- 多嵌入模型支持（`openai` / `bge_api`）
-- BGE 重排支持
-- `enhanced / legacy` 运行模式切换
+在保留原项目「PDF 解析 → 向量/BM25 检索 → 路由 → LLM 作答」主链路的基础上，本仓库增加了可开关的运行配置与答案治理逻辑，便于对照实验与落地。
+
+- **双运行模式**（`enhanced` / `legacy`）：切换默认嵌入与重排组合；一种贴近原项目「OpenAI 嵌入 + LLM 重排」习惯，一种偏向 BGE 检索链路；亦可通过命令行单独指定嵌入提供方与重排器类型。
+- **多嵌入与多路重排**：支持多种嵌入后端与 LLM / BGE 重排；检索侧可将 BM25 与向量检索结果按权重融合，重排侧可将 LLM 给出的相关性分数与向量相似度加权组合（权重可调）。
+- **向量距离与 LLM 分数同向融合**：混合重排时，将向量检索返回的**距离**映射为与 LLM 相关性**同单调性**的相似度（距离越小相似度越高），再与 LLM 分数加权，避免「越大越好 / 越小越好」混用带来的排序扭曲。
+- **查询改写**、**多轮会话记忆**、**答案与上下文相似度校验**。
+- **多路由预设**（`balanced` / `economy` / `quality`）：在既定 profile 之上再叠加「成本—效果」档位。**economy** 会收紧或降级相似度校验、统一采用更轻量的模型档位并限制核验轮数等，使单次问答的 **LLM 调用次数与单价显著低于**「全量高质量」路径；**quality** 则偏向更强模型与更完整校验。改造并启用多路由后，**实测综合成本较改动前明显下降**。在 **n = 10** 的小样本对比测试中，**未观察到准确率相对改动前下降**（小样本方差大，该结论仅作冒烟参考，不能外推到大题集）。运行结束后可结合导出的路由用量统计，对照各档位调用量与费用。默认 **balanced** 介于两者之间。
+- **金融垂直模式与拒答机制**：在金融配置下，检索前做约束改写、生成后做规则化与口径检查；信息不足或口径冲突时保守输出「不可用」类结果。另可选**多信号弃权门控**：将检索强度、置信度、校验是否通过等**连续或有序信号**与阈值比较，映射为「是否拒答」的**二元决策**；它与显著性检验或点估计无关，本质是带截断的决策规则，在**有限题量**下拒答比例与「该拒却答 / 该答却拒」的相对频率会随题目分布与阈值设定而波动，若要单独评价门控优劣，需要更大样本或离线回放实验。详细行为见下文「金融垂直模式」。
+
+## 语言与检索场景
+
+当前典型用法是：**用户侧中文提问**，**语料侧为英文年报等**，检索与索引以英文（及通用多语向量）为主，与上述设定匹配。
+
+若后续产品形态改为**大量中文查询或中文被检索文本占主导**，在 BM25 等依赖分词的环节，可评估引入 **jieba** 等中文分词以改善稀疏检索与召回；向量路径则需与所选嵌入模型语言覆盖一并评估。
 
 ## 快速开始
 
@@ -28,7 +36,7 @@ pip install -e . -r requirements.txt
 运行（推荐增强模式）：
 
 ```bash
-cd data/test_set
+cd data/datasets/test_set
 python ..\..\main.py process-questions --config base --profile enhanced
 ```
 
@@ -36,6 +44,8 @@ python ..\..\main.py process-questions --config base --profile enhanced
 
 - `enhanced`（默认）：改造后结构，默认 BGE 优先（`bge_api + bge`）
 - `legacy`：原项目风格，默认 `openai + llm reranker`
+
+同一配置下可通过 **`--route`**（或等价运行参数）选择 **balanced / economy / quality**。引入多路由后，**economy** 等轻量档位在批量评测与线上推理中可显著压低**总调用量与综合成本**（相对「每一步都跑满相似度 + 大模型核验」的单一重路径）。作者在 **n = 10** 的评测子集上对比改动前后，**未看到效果指标系统性变差**；因样本极小，该结果只能说明「短名单上成本降而未见明显回落」，**不能**替代大样本或生产监控下的效果验证。具体成本幅度仍依赖题量、是否开启改写与核验等开关。
 
 示例：
 
@@ -48,15 +58,15 @@ python main.py process-questions --config base --profile enhanced --embedding-pr
 ## 金融垂直模式
 
 ```bash
-cd data/test_set
+cd data/datasets/test_set
 python ..\..\main.py process-questions --config finance_vertical --profile enhanced
 ```
 
 评测：
 
 ```bash
-python scripts/finance_eval.py --pred data/test_set/answers_finance_vertical.json
-python scripts/finance_eval.py --pred data/test_set/answers_finance_vertical.json --gold data/test_set/answers_max_nst_o3m.json
+python scripts/finance_eval.py --pred data/datasets/test_set/answers_finance_vertical.json
+python scripts/finance_eval.py --pred data/datasets/test_set/answers_finance_vertical.json --gold data/datasets/test_set/answers_max_nst_o3m.json
 ```
 
 ### 设计构思
@@ -77,7 +87,7 @@ python scripts/finance_eval.py --pred data/test_set/answers_finance_vertical.jso
 - **金融规则后处理**：对数值答案做单位规范化、币种一致性检查
 - **缺失值保守策略**：上下文不足或口径冲突时返回 `N/A` / 信息不足
 
-### 典型应用场景（给业务方/团队直接使用）
+### 典型应用场景
 
 - **投研与研报辅助**：从多家公司年报中快速抽取关键财务指标（营收、净利、现金流、资产负债等）并给出处页码
 - **财务尽调与并购分析**：批量问答目标公司历史财务口径，减少人工翻阅 PDF 的时间成本
@@ -85,37 +95,111 @@ python scripts/finance_eval.py --pred data/test_set/answers_finance_vertical.jso
 - **IR/董秘与管理层问答支持**：把高频财务问题转成可追溯问答，快速定位原文证据
 - **金融知识库检索中台**：作为企业内部财报问答引擎，为 BI、风控、客服机器人提供结构化问答能力
 
-### 业务意义
-
-- 在财务分析、投研支持、审计辅助等场景中，降低“数字正确但口径错误”的风险
-- 提升结果可解释性：回答更容易追溯到对应页码与原文
-- 更适合做自动化批量问答，因为错误类型更可控、可监控
-
 ### 适用边界
 
 - 该模式更偏“保守准确”，在信息缺失时会更倾向拒答
 - 如果你的场景更看重召回覆盖率，可配合 `legacy` 或放宽后处理策略
 
+## 合并基准：三轮随机子集评测（strict）
+
+在合并剪枝后的 **125 题**池上，以种子 **2025 / 2026 / 2027** 各随机抽取 **30** 题（三轮题集互不重叠）；配置 **`max_nst_o3m`**，嵌入与重排与实验当时一致；对比 **legacy** 与 **enhanced** 两套流水线输出。指标为 **strict**（该轮 30 道 gold 全部计分）。原始预测与明细见仓库内对应 `benchmark_merged_125_rand30_*` 数据目录。
+
+### 分轮准确率（legacy / enhanced / Δ）
+
+**Δ** 均为 enhanced − legacy（百分点）。每轮各题型（`number` / `name` / `boolean`）条数随抽样变化，下表分项准确率的分母是「当轮、该题型子集」，不宜跨轮把题数简单相加。
+
+| 轮次 | gold 数量 (num / name / bool) | legacy（num / name / bool） | enhanced（num / name / bool） | Δ（num / name / bool） | Δ 整体 |
+|------|------------------------------|-----------------------------|------------------------------|------------------------|--------|
+| R1 · seed=2025 | 18 / 7 / 5 | 66.67% / 28.57% / 80.00% | 72.22% / 57.14% / 60.00% | +5.56% / +28.57% / −20.00% | **+6.67%** |
+| R2 · seed=2026 | 20 / 5 / 5 | 75.00% / 20.00% / 60.00% | 85.00% / 60.00% / 60.00% | +10.00% / +40.00% / 0.00% | **+13.33%** |
+| R3 · seed=2027 | 16 / 8 / 6 | 68.75% / 25.00% / 66.67% | 68.75% / 37.50% / 33.33% | 0.00% / +12.50% / −33.33% | **−3.33%** |
+
+| 轮次 | legacy 整体 | enhanced 整体 | Δ 整体 |
+|------|-------------|---------------|--------|
+| R1 | 60.00% | 66.67% | +6.67% |
+| R2 | 63.33% | 76.67% | +13.33% |
+| R3 | 56.67% | 53.33% | −3.33% |
+
+**表意说明（分轮）**
+
+- 两张表共同说明：三轮中 **legacy 与 enhanced 的相对强弱随抽样变化**。R1、R2 整体 Δ 为正，R3 为 **−3.33%**，即该轮 enhanced 的 strict 整体低于 legacy。
+- **R3 负向整体 Δ 的拆解**：该轮 **数值题（number）两版本同为 68.75%**，未拖累整体；**实体名类（name）** enhanced 仍高于 legacy（+12.50 个百分点）；差距主要集中在 **判断题（boolean）**：legacy **66.67%（4/6）**、enhanced **33.33%（2/6）**，即两版本相差 2 道判断题，在仅 6 道判断题时足以显著拉低 enhanced 的整卷 strict。可能原因包括：布尔答案与 gold 在字面（如 `True`/`False` 与表述）上的匹配差异、该轮 enhanced 在判断题上更激进的拒答或生成风格、以及小题量下放大的随机性。**不能**用分题型 Δ 按题数反推整体 Δ，但整体变负与该轮 boolean 大幅下滑在方向上一致。
+
+### 三轮汇总（均值 ± 样本标准差，n = 3）
+
+对三个「轮次整体准确率」及三个「Δ 整体」分别求算术均值与样本标准差（分母 n−1），**不是**在合并 90 题上重算一条准确率。
+
+**整体**
+
+| 指标 | 均值 ± 标准差 |
+|------|----------------|
+| legacy 整体 | 60.00% ± 3.33% |
+| enhanced 整体 | 65.56% ± 11.71% |
+| Δ 整体（enh − leg） | +5.56% ± 8.39% |
+
+**解读**：enhanced 三轮平均更高，但标准差明显大于 legacy，说明改造栈在不同子集上波动更大；Δ 的均值虽为正，标准差亦大，不能理解为「任意抽样都稳定领先约 5.6 个百分点」。
+
+**分题型**（对三轮「各题型 strict」分别再求均值 ± 标准差，**不是**把 90 题按题型合并成一大池）
+
+| schema | legacy | enhanced | Δ（enh − leg） |
+|--------|--------|----------|----------------|
+| number | 70.14% ± 4.34% | 75.32% ± 8.56% | +5.19% ± 5.01% |
+| name | 24.52% ± 4.31% | 51.55% ± 12.25% | +27.02% ± 13.82% |
+| boolean | 68.89% ± 10.18% | 51.11% ± 15.40% | −17.78% ± 16.78% |
+
+**分题型解读（在数值变化之后）**
+
+- **number（数值）**：三轮平均上 enhanced 略高于 legacy，Δ 为正且标准差相对可控。可能原因包括：混合检索与重排更贴片段时，数值抽取与单位对齐更容易命中；三轮间波动仍反映不同子集中表格难度、币种与财年口径差异。
+- **name（公司名 / 实体比较等）**：legacy 在三轮 name 子集上平均准确率很低，enhanced 平均明显更高，故 Δ 均值为大额正数；但标准差很大，与每轮 name 题量较少（约 5～8）有关，**统计上不稳定**，解释时需谨慎。机理上，多实体比较、排序类问题依赖检索覆盖与片段排序，改造栈若改善召回与重排，更容易体现为 name 类提升。
+- **boolean（判断）**：Δ 均值为负，且标准差最大。除 R3 中判断题大幅落后外，R1 中 enhanced 在判断题上也低于 legacy。可能原因包括：strict 计分下输出需与 gold 的布尔字面一致，模型措辞或拒答策略易导致「该判错」；判断题在子集中条数少，单轮涨跌会被放大；若 enhanced 更倾向拒答或输出与 `True`/`False` 规范不一致，会集中体现在该类型上。
+
+**小结：题型与模式选择（基于上述三轮数据，非普适结论）**
+
+- **数值题（number）**：三轮汇总上 **enhanced 平均略高、Δ 为正且离散相对小**，更依赖检索与重排是否贴片段；若业务以「从报表抽数」为主，可**优先尝试 enhanced**（或与 legacy 做 A/B），并在意成本时配合 **economy** 路由压调用量。
+- **实体名 / 比较类（name）**：**enhanced 相对 legacy 的平均提升很大**，但标准差也大，说明在 name 子集上**改进方向明确、但单轮结果不稳定**；适合在**扩大样本或固定题单**后再做部署决策，不宜仅凭一轮抽样定稿。
+- **判断题（boolean）**：三轮汇总 **legacy 平均更高，Δ 为负且波动最大**；若产线题型含大量是非/披露类判断，且要求与标注字面一致，短期内可**更保守地采用 legacy**，或对 enhanced **单独做布尔输出规范化**（后处理、专用提示或子路由）。
+- **整体**：enhanced **平均 strict 更高但方差更大**，legacy **更稳**。多路由改造后 **成本显著下降**；在 **n = 10** 的小样本对照中 **未观察到相对改动前的性能下降**，但该规模不足以证明大样本上无损，仅作辅助说明。综合「效果—稳定性—成本」，常见做法是：**数值与实体比较类偏向 enhanced + 按需选 route**；**判断类先验证再切栈**，或通过题型路由分流。
+
+## 未来可能的优化方向
+
+- **样本与评测**：在合并池或更大固定题单上重复评测，对整体与分题型准确率给出区间或重复抽样下的波动范围，减少对三轮 ×30 题随机子集的依赖。
+- **判断题专项**：针对 boolean 设计输出模板、后处理或与检索解耦的短链路，降低 strict 下字面不匹配与拒答过冲；必要时对判断类走单独路由或模型。
+- **门控与阈值**：对弃权门控做离线网格或贝叶斯优化，在「拒答率—误判率」曲线上选运营可接受的点；避免单次主观定阈值。
+- **多路由与题型**：探索按题型或意图自动选择 `economy` / `quality`，在成本约束下最大化关键题型效果。
+- **中文检索**：若查询与被检索文本中文占比上升，评估 BM25 侧 **jieba** 等分词与向量模型语言对齐（参见上文「语言与检索场景」）。
+- **检索与融合**：继续调 BM25—向量融合比例、重排 batch 与混合分数权重，观察对 number/name 的稳定影响。
+
+## 仓库结构（简要）
+
+| 路径 | 说明 |
+|------|------|
+| `src/` | 可导入包：流水线、检索、路由、评测逻辑等 |
+| `src/benchmark/` | Round1 benchmark：数据准备与 strict 计分（根目录同名 `.py` 为薄 CLI 入口） |
+| `scripts/` | 命令行工具：子集构建、批量打分、对照实验等 |
+| `data/datasets/` | 语料与 benchmark 子目录（路径见 `src/data_paths.py`） |
+| `tests/` | 单元与集成测试 |
+| `docs/` | 内部说明（如会话交接笔记） |
+
 ## 常用实验脚本
 
-- `benchmark_prepare_round1.py`：准备 benchmark 数据
-- `benchmark_compare_round1.py`：跑对比评测
+- `benchmark_prepare_round1.py`：准备 benchmark 数据（实现：`src/benchmark/prepare_round1.py`）
+- `benchmark_compare_round1.py`：对比评测（strict，按 `schema` 分项；实现：`src/benchmark/compare_round1.py`）
+- `scripts/compare_baseline_vs_new_params.py`：双预测文件对同一 gold 打分
+- `scripts/sample_benchmark_subset.py`：随机子集抽样（含 `--merged-benchmark`）
 - `scripts/ab_score_openai_bge.py`：OpenAI vs BGE 打分
 - `scripts/triple_eval_repeats.py`：三组重复实验
 - `scripts/triple_recompute_from_existing.py`：重算修正版均值
+- `scripts/validate_datasets.py`：检查 `data/datasets` 各子集内部重复项
 
-## 当前结果（benchmark_round1_soft）
+## 其他参考结果（`data/datasets/benchmark_round1_soft`）
 
-- 改造后 OpenAI vs 改造后 BGE（10题）：`90.00%` vs `100.00%`
-- 三组 3 次重复平均：
-  - 原项目：`93.33%`
-  - 改造后 OpenAI：`83.33%`
-  - 改造后 BGE：`100.00%`
+- 改造后 OpenAI vs 改造后 BGE（10 题）：`90.00%` vs `100.00%`
+- 三组 3 次重复平均：原项目 `93.33%`；改造后 OpenAI `83.33%`；改造后 BGE `100.00%`
 
 结果文件：
 
-- `data/benchmark_round1_soft/ab_report_openai_vs_bge.json`
-- `data/benchmark_round1_soft/triple_compare_repeats_report_fixed.json`
+- `data/datasets/benchmark_round1_soft/ab_report_openai_vs_bge.json`
+- `data/datasets/benchmark_round1_soft/triple_compare_repeats_report_fixed.json`
 
 ## 测试
 

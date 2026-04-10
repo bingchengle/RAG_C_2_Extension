@@ -1,3 +1,4 @@
+import argparse
 import json
 import shutil
 import subprocess
@@ -9,10 +10,11 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import benchmark_compare_round1 as bc
+from src.benchmark import compare_round1 as bc
+from src.data_paths import BENCHMARK_ROUND1_SOFT_DIR
 
 
-BENCH_DIR = ROOT / "data" / "benchmark_round1_soft"
+BENCH_DIR = BENCHMARK_ROUND1_SOFT_DIR
 RUNS_DIR = BENCH_DIR / "triple_runs"
 UPSTREAM_MAIN = ROOT / "_upstream_source" / "main.py"
 
@@ -47,7 +49,7 @@ def _run_improved_once(run_idx: int, provider: str, reranker: str) -> Path:
         sys.executable,
         str(ROOT / "benchmark_compare_round1.py"),
         "--bench-dir",
-        "data/benchmark_round1_soft",
+        BENCH_DIR.relative_to(ROOT).as_posix(),
         "--improved-only",
         "--parallel-requests",
         "1",
@@ -70,6 +72,9 @@ def _mean(values: List[float]) -> float:
 
 
 def main() -> None:
+    ap = argparse.ArgumentParser(description="Triple-run benchmark_compare on soft benchmark")
+    args = ap.parse_args()
+
     RUNS_DIR.mkdir(parents=True, exist_ok=True)
     gold = _load_json(BENCH_DIR / "gold_answers.json")
 
@@ -112,6 +117,7 @@ def main() -> None:
 
     summary = {
         "benchmark": str(BENCH_DIR),
+        "score_protocol": "strict",
         "runs_dir": str(RUNS_DIR),
         "notes": "Improved run-1 reused from previous completed experiment; source run-1..3 freshly executed.",
         "per_run": per_run,
@@ -129,6 +135,7 @@ def main() -> None:
     out.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
 
     print("=== Triple Compare (3 runs) ===")
+    print("score_protocol=strict")
     print(f"Source avg:         {summary['averages']['source']:.2%}")
     print(f"Improved OpenAI avg:{summary['averages']['improved_openai']:.2%}")
     print(f"Improved BGE avg:   {summary['averages']['improved_bge']:.2%}")

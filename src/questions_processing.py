@@ -2,9 +2,12 @@ import json
 from typing import Union, Dict, List, Optional, Any
 import re
 from pathlib import Path
+import numpy as np
 from src.retrieval import VectorRetriever, HybridRetriever
 from src.api_requests import APIProcessor
 from src.answer_generator_optimized import AnswerGeneratorOptimized
+from src.route_config import RouteUsageStats, effective_model
+from src.embedding_clients import EmbeddingAPIClient
 from tqdm import tqdm
 import pandas as pd
 import threading
@@ -37,12 +40,12 @@ class QuestionsProcessor:
         documents_dir: Union[str, Path] = './documents',
         questions_file_path: Optional[Union[str, Path]] = None,
         new_challenge_pipeline: bool = False,
-            #new_challenge_pipeline 是「严格问答流程」的开关，启用后系统会执行「页码验证 + 标准化参考文献生成」
+
         subset_path: Optional[Union[str, Path]] = None,
         parent_document_retrieval: bool = False,
         llm_reranking: bool = False,
-        llm_reranking_sample_size: int = 20,
-        top_n_retrieval: int = 10,
+        llm_reranking_sample_size: int = 36,
+        top_n_retrieval: int = 14,
         parallel_requests: int = 10,
         api_provider: str = "openai",
         answering_model: str = "gpt-4o-2024-08-06",
@@ -59,18 +62,33 @@ class QuestionsProcessor:
         enable_query_rewrite: bool = False,
         enable_similarity_check: bool = True,
         enable_multi_turn: bool = False,
-        conversation_max_turns: int = 6
-            # Optional[...] 表示参数可以为 None（如 questions_file_path）
-            #所有参数都加了类型注解（如 Union[str, Path] 表示支持字符串或 Path 对象）
+        conversation_max_turns: int = 6,
+        route: str = "balanced",
+        rewrite_model: str = "",
+        llm_rerank_model: str = "gpt-4o-mini-2024-07-18",
+        answer_model: str = "",
+        verification_model: str = "",
+        max_verification_rounds: int = 2,
+        comparative_rephrase_model: str = "",
+        similarity_mode: str = "openai_large",
+        hybrid_rerank_llm_weight: float = 0.7,
+        hybrid_merge_bm25_weight: float = 0.3,
+        llm_rerank_documents_batch_size: int = 2,
+        enable_abstention_gate: bool = False,
+        abstain_min_retrieval_strength: Optional[float] = None,
+        abstain_min_confidence: Optional[float] = None,
+        abstain_on_validation_fail: bool = False,
+
+
     ):
         self.questions = self._load_questions(questions_file_path)
         self.documents_dir = Path(documents_dir)
         self.vector_db_dir = Path(vector_db_dir)
         self.bm25_db_dir = Path(bm25_db_dir)
         self.subset_path = Path(subset_path) if subset_path else None
-        #路径标准化：将字符串路径转为 Path 对象（方便后续文件操作）
 
-        
+
+
         self.new_challenge_pipeline = new_challenge_pipeline
         self.return_parent_pages = parent_document_retrieval
         self.llm_reranking = llm_reranking
@@ -92,17 +110,38 @@ class QuestionsProcessor:
         self.enable_similarity_check = enable_similarity_check
         self.enable_multi_turn = enable_multi_turn
         self.conversation_max_turns = max(1, conversation_max_turns)
+        self.route = (route or "balanced").lower()
+        self.llm_rerank_model = llm_rerank_model
+        self.similarity_mode = (similarity_mode or "openai_large").lower()
+        self.hybrid_rerank_llm_weight = max(0.0, min(1.0, float(hybrid_rerank_llm_weight)))
+        self.hybrid_merge_bm25_weight = max(0.0, min(1.0, float(hybrid_merge_bm25_weight)))
+        self.llm_rerank_documents_batch_size = max(1, int(llm_rerank_documents_batch_size))
+        self.enable_abstention_gate = enable_abstention_gate
+        self.abstain_min_retrieval_strength = abstain_min_retrieval_strength
+        self.abstain_min_confidence = abstain_min_confidence
+        self.abstain_on_validation_fail = abstain_on_validation_fail
+        self._rewrite_model_effective = effective_model(rewrite_model, answering_model)
+        self._comparative_model_effective = effective_model(comparative_rephrase_model, answering_model)
+        self.route_usage = RouteUsageStats()
         self.openai_processor = APIProcessor(provider=api_provider)
-        #self.openai_processor 是一个封装好的 API 处理器，目的是屏蔽不同厂商（如 OpenAI、Anthropic）的 API 调用差异，让后续代码无需关心具体的 API 调用细节。
-        self.answer_generator = AnswerGeneratorOptimized(domain=self.domain)
+
+        _answer_model = effective_model(answer_model, answering_model)
+        _verification_model = effective_model(verification_model, "gpt-4o-mini-2024-07-18")
+        self.answer_generator = AnswerGeneratorOptimized(
+            domain=self.domain,
+            model=_answer_model,
+            verification_model=_verification_model,
+            max_verification_rounds=max_verification_rounds,
+            usage_stats=self.route_usage,
+        )
         self.full_context = full_context
 
         self.answer_details = []
-        self.detail_counter = 0# 计数器：记录已处理的问答数量
+        self.detail_counter = 0
         self._lock = threading.Lock()
         self._conversation_lock = threading.Lock()
         self._conversation_store: Dict[str, List[Dict[str, str]]] = {}
-        #self._lock = threading.Lock() 是为了应对 parallel_requests 带来的多线程并发，防止 answer_details、detail_counter 等共享变量被多线程同时修改导致数据错乱
+
 
     @staticmethod
     def _is_na_like(value: Any) -> bool:
@@ -110,6 +149,51 @@ class QuestionsProcessor:
             return True
         normalized = str(value).strip().lower()
         return normalized in {"n/a", "na", "信息不足", "insufficient information", "not available", ""}
+
+    @staticmethod
+    def _retrieval_strength(retrieval_results: List[Dict[str, Any]]) -> float:
+        """Best retrieval signal in [0,1]: hybrid combined_score, rerank relevance, or 1 - vector distance."""
+        if not retrieval_results:
+            return 0.0
+        best = 0.0
+        for d in retrieval_results:
+            if "combined_score" in d:
+                best = max(best, float(d["combined_score"]))
+            elif "relevance_score" in d:
+                best = max(best, float(d["relevance_score"]))
+            else:
+                dist = float(d.get("distance", 1.0))
+                best = max(best, max(0.0, min(1.0, 1.0 - dist)))
+        return best
+
+    @staticmethod
+    def _abstention_value_for_schema(schema: str) -> Any:
+        if schema == "boolean":
+            return False
+        return "N/A"
+
+    def _evaluate_abstention(
+        self,
+        retrieval_results: List[Dict[str, Any]],
+        answer_dict: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        reasons: List[str] = []
+        if self.abstain_on_validation_fail and not answer_dict.get("validation_passed", True):
+            reasons.append("validation_failed")
+        if self.abstain_min_confidence is not None:
+            conf = float(answer_dict.get("confidence") or 0.0)
+            if conf < float(self.abstain_min_confidence):
+                reasons.append("low_confidence")
+        if self.abstain_min_retrieval_strength is not None:
+            if self._retrieval_strength(retrieval_results) < float(self.abstain_min_retrieval_strength):
+                reasons.append("weak_retrieval")
+        apply_abstain = len(reasons) > 0
+        summary = (
+            "信息不足（拒答触发：" + ", ".join(reasons) + "）。"
+            if reasons
+            else ""
+        )
+        return {"apply": apply_abstain, "reasons": reasons, "summary": summary}
 
     @staticmethod
     def _extract_numeric_value_for_comparison(value: Any) -> Optional[float]:
@@ -121,7 +205,7 @@ class QuestionsProcessor:
         text = text_raw.lower()
         if not text:
             return None
-        # Avoid extracting years/numbers from long natural language sentences.
+
         numeric_like = re.fullmatch(
             r"[$€£¥￥]?\s*[-+]?\d+(?:,\d{3})*(?:\.\d+)?\s*(?:%|billion|million|thousand|bn|mn|k)?",
             text,
@@ -138,7 +222,7 @@ class QuestionsProcessor:
         except ValueError:
             return None
 
-        # Normalize common unit suffixes into comparable scalar values.
+
         if "billion" in text or re.search(r"\bbn\b", text):
             number *= 1_000_000_000.0
         elif "million" in text or re.search(r"\bmn\b", text):
@@ -166,7 +250,7 @@ class QuestionsProcessor:
         if prefer_max:
             return max(scored, key=lambda x: x[1])[0]
 
-        # Default to maximum for "which company had ..." style comparisons.
+
         return max(scored, key=lambda x: x[1])[0]
 
     def _build_comparative_company_fallback_queries(self, original_question: str, company: str) -> List[str]:
@@ -198,7 +282,7 @@ class QuestionsProcessor:
             if metric not in alias_terms:
                 alias_terms = [metric] + alias_terms
 
-            # Add apostrophe-free variant to improve retrieval hit rate.
+
             alias_terms.extend([term.replace("'", "") for term in alias_terms if "'" in term])
 
             for alias_metric in alias_terms:
@@ -242,29 +326,29 @@ class QuestionsProcessor:
         """Format vector retrieval results into RAG context string"""
         if not retrieval_results:
             return ""
-        
+
         context_parts = []
         for result in retrieval_results:
             page_number = result['page']
             text = result['text']
             context_parts.append(f'Text retrieved from page {page_number}: \n"""\n{text}\n"""')
-            
+
         return "\n\n---\n\n".join(context_parts)
 
     def _extract_references(self, pages_list: list, company_name: str) -> list:
-        # Load companies data
+
         if self.subset_path is None:
             raise ValueError("subset_path is required for new challenge pipeline when processing references.")
         self.companies_df = pd.read_csv(self.subset_path)
 
-        # Find the company's SHA1 from the subset CSV
-        #pdf_sha1：是 PDF 文档的「唯一身份证」（不管文件名怎么改，SHA1 值不变），用来精准定位是哪个文档；
+
+
         matching_rows = self.companies_df[self.companies_df['company_name'] == company_name]
         if matching_rows.empty:
             company_sha1 = ""
         else:
             company_sha1 = matching_rows.iloc[0]['sha1']
-            # 为什么用iloc[0]？防止CSV里有重名公司（比如两个「腾讯」），只取第一个，保证结果唯一。
+
 
         refs = []
         for page in pages_list:
@@ -276,34 +360,34 @@ class QuestionsProcessor:
         Validate that all page numbers mentioned in the LLM's answer are actually from the retrieval results.
         If fewer than min_pages valid references remain, add top pages from retrieval results.
         """
-        if claimed_pages is None:#边界处理：若 LLM 未返回任何声称的页码，初始化为空列表
+        if claimed_pages is None:
             claimed_pages = []
-        
+
         retrieved_pages = [result['page'] for result in retrieval_results]
-        
+
         validated_pages = [page for page in claimed_pages if page in retrieved_pages]
-        
-        if len(validated_pages) < len(claimed_pages):#提示幻觉：若有页码被过滤，打印警告（暴露 LLM 编造的页码）
+
+        if len(validated_pages) < len(claimed_pages):
             removed_pages = set(claimed_pages) - set(validated_pages)
             print(f"Warning: Removed {len(removed_pages)} hallucinated page references: {removed_pages}")
-        
-        if len(validated_pages) < min_pages and retrieval_results:#补充不足：若有效页码少于 min_pages，从检索结果中补充 Top-N 页码
+
+        if len(validated_pages) < min_pages and retrieval_results:
             existing_pages = set(validated_pages)
-            #转化为集合的原因：1、集合遍历速度更快；2、集合会自动去重，避免页码重复；3、综合以上两点最后同字典append做比对
-            
+
+
             for result in retrieval_results:
                 page = result['page']
                 if page not in existing_pages:
                     validated_pages.append(page)
                     existing_pages.add(page)
-                    
+
                     if len(validated_pages) >= min_pages:
-                        break# 达到最小值则停止补充
-        
-        if len(validated_pages) > max_pages:#截断过多：若有效页码超过 max_pages，截断到最大值
+                        break
+
+        if len(validated_pages) > max_pages:
             print(f"Trimming references from {len(validated_pages)} to {max_pages} pages")
             validated_pages = validated_pages[:max_pages]
-        
+
         return validated_pages
 
     def _stringify_history(self, history: List[Dict[str, str]]) -> str:
@@ -345,14 +429,56 @@ class QuestionsProcessor:
                 history = history[-max_messages:]
             self._conversation_store[conversation_id] = history
 
+    def _expand_boolean_retrieval_query(self, original_question: str, query: str) -> str:
+        """Append disclosure-oriented terms so vector/BM25 recall MD&A and footnotes (minimal patch)."""
+        q = original_question.lower()
+        terms: List[str] = []
+        if any(
+            x in q
+            for x in (
+                "merger",
+                "mergers",
+                "acquisition",
+                "acquisitions",
+                "m&a",
+                "takeover",
+                "acquire",
+            )
+        ):
+            terms.extend(
+                [
+                    "business combination",
+                    "acquired",
+                    "merger agreement",
+                    "purchase agreement",
+                ]
+            )
+
+
+        if not terms:
+            return query
+        uniq = list(dict.fromkeys(terms))[:6]
+        return f"{query} | disclosure keywords: {', '.join(uniq)}"
+
+    def _maybe_expand_boolean_query(
+        self,
+        original_question: str,
+        query: str,
+        schema: Optional[str],
+    ) -> str:
+        if (schema or "").lower() != "boolean":
+            return query
+        return self._expand_boolean_retrieval_query(original_question, query)
+
     def _rewrite_query_for_retrieval(
         self,
         question: str,
         company_name: str,
-        conversation_history: Optional[List[Dict[str, str]]] = None
+        conversation_history: Optional[List[Dict[str, str]]] = None,
+        schema: Optional[str] = None,
     ) -> str:
         if not self.enable_query_rewrite and not conversation_history:
-            return question
+            return self._maybe_expand_boolean_query(question, question, schema)
         history_text = self._stringify_history(conversation_history or [])
         system_prompt = (
             "You rewrite user questions for document retrieval. "
@@ -372,21 +498,22 @@ class QuestionsProcessor:
         )
         try:
             rewritten = self.openai_processor.send_message(
-                model=self.answering_model,
+                model=self._rewrite_model_effective,
                 temperature=0,
                 system_content=system_prompt,
                 human_content=user_prompt,
                 is_structured=False
             )
             if not isinstance(rewritten, str):
-                return question
+                return self._maybe_expand_boolean_query(question, question, schema)
             rewritten = rewritten.strip().strip('"').strip()
             rewritten = rewritten or question
+            self.route_usage.record_rewrite()
             if self.domain == "finance" and self.finance_metric_expansion:
                 rewritten = self._expand_finance_query_with_synonyms(rewritten)
-            return rewritten
+            return self._maybe_expand_boolean_query(question, rewritten, schema)
         except Exception:
-            return question
+            return self._maybe_expand_boolean_query(question, question, schema)
 
     def _expand_finance_query_with_synonyms(self, query: str) -> str:
         """Append likely finance metric synonyms to improve recall."""
@@ -490,20 +617,67 @@ class QuestionsProcessor:
             return "N/A", check
         return answer, check
 
+    def _cosine_from_embeddings(self, vectors: List[List[float]]) -> List[float]:
+        """Pairwise cosine similarity of first vector against each of the rest."""
+        if not vectors:
+            return []
+        v0 = np.array(vectors[0], dtype=np.float64)
+        n0 = np.linalg.norm(v0)
+        out: List[float] = []
+        for i in range(1, len(vectors)):
+            vi = np.array(vectors[i], dtype=np.float64)
+            ni = np.linalg.norm(vi)
+            if n0 == 0 or ni == 0:
+                out.append(0.0)
+            else:
+                out.append(float(np.dot(v0, vi) / (n0 * ni)))
+        return out
+
+    def _similarity_via_query_embeddings(
+        self, answer_text: str, retrieval_results: List[Dict[str, Any]], context_text: str
+    ) -> Dict[str, float]:
+        client = EmbeddingAPIClient(provider=self.embedding_provider, model=self.embedding_model)
+        chunk_texts = [item.get("text", "") for item in retrieval_results[:5] if item.get("text")]
+
+        emb_ctx = client.embed_texts([answer_text, context_text])
+        self.route_usage.record_similarity_query_embedding(1)
+        ctx_sims = self._cosine_from_embeddings(emb_ctx)
+        context_similarity = ctx_sims[0] if ctx_sims else 0.0
+
+        if chunk_texts:
+            emb_chunks = client.embed_texts([answer_text] + chunk_texts)
+            self.route_usage.record_similarity_query_embedding(1)
+            chunk_sims = self._cosine_from_embeddings(emb_chunks)
+            best_chunk_similarity = max(chunk_sims) if chunk_sims else context_similarity
+        else:
+            best_chunk_similarity = context_similarity
+
+        return {
+            "context_similarity": round(float(context_similarity), 4),
+            "best_chunk_similarity": round(float(best_chunk_similarity), 4),
+        }
+
     def _calculate_answer_similarity(self, answer_text: str, retrieval_results: List[Dict[str, Any]]) -> Optional[Dict[str, float]]:
-        if not self.enable_similarity_check or not answer_text or not retrieval_results:
+        if not self.enable_similarity_check or self.similarity_mode == "off":
+            return None
+        if not answer_text or not retrieval_results:
             return None
         try:
             context_text = "\n\n".join(item.get("text", "") for item in retrieval_results[:5] if item.get("text"))
             if not context_text:
                 return None
+            if self.similarity_mode == "same_as_query":
+                return self._similarity_via_query_embeddings(answer_text, retrieval_results, context_text)
+
             context_similarity = VectorRetriever.get_strings_cosine_similarity(answer_text, context_text)
+            self.route_usage.record_similarity_openai(1)
 
             chunk_scores = []
             for item in retrieval_results[:5]:
                 text = item.get("text", "")
                 if text:
                     score = VectorRetriever.get_strings_cosine_similarity(answer_text, text)
+                    self.route_usage.record_similarity_openai(1)
                     chunk_scores.append(score)
 
             best_chunk_similarity = max(chunk_scores) if chunk_scores else context_similarity
@@ -533,7 +707,9 @@ class QuestionsProcessor:
                 embedding_provider=self.embedding_provider,
                 embedding_model=self.embedding_model,
                 reranker_type=self.reranker_type,
-                domain=self.domain
+                domain=self.domain,
+                llm_rerank_model=self.llm_rerank_model,
+                usage_stats=self.route_usage,
             )
         else:
             retriever = VectorRetriever(
@@ -548,25 +724,38 @@ class QuestionsProcessor:
         retrieval_query = self._rewrite_query_for_retrieval(
             question=question,
             company_name=company_name,
-            conversation_history=effective_history
+            conversation_history=effective_history,
+            schema=schema,
         )
 
         if self.full_context:
             retrieval_results = retriever.retrieve_all(company_name)
-            #full_context：开关，True 时返回公司所有文档（适合简单问题），False 时只返回和问题相关的 Top-N 片段（避免上下文过长，提升 LLM 回答效率）
-        else:           
-            retrieval_results = retriever.retrieve_by_company_name(
-                company_name=company_name,
-                query=retrieval_query,
-                llm_reranking_sample_size=self.llm_reranking_sample_size,
-                top_n=self.top_n_retrieval,
-                return_parent_pages=self.return_parent_pages
-            )
-        
+
+        else:
+            if self.llm_reranking:
+                retrieval_results = retriever.retrieve_by_company_name(
+                    company_name=company_name,
+                    query=retrieval_query,
+                    llm_reranking_sample_size=self.llm_reranking_sample_size,
+                    top_n=self.top_n_retrieval,
+                    return_parent_pages=self.return_parent_pages,
+                    llm_weight=self.hybrid_rerank_llm_weight,
+                    bm25_weight=self.hybrid_merge_bm25_weight,
+                    documents_batch_size=self.llm_rerank_documents_batch_size,
+                )
+            else:
+                retrieval_results = retriever.retrieve_by_company_name(
+                    company_name=company_name,
+                    query=retrieval_query,
+                    llm_reranking_sample_size=self.llm_reranking_sample_size,
+                    top_n=self.top_n_retrieval,
+                    return_parent_pages=self.return_parent_pages,
+                )
+
         if not retrieval_results:
             raise ValueError("No relevant context found")
-        
-        # 使用 AnswerGeneratorOptimized 生成答案
+
+
         answer_result = self.answer_generator.generate_answer(
             query=question,
             context=retrieval_results,
@@ -576,8 +765,8 @@ class QuestionsProcessor:
             answer_text=answer_result.answer,
             retrieval_results=retrieval_results
         )
-        
-        # 构建答案字典
+
+
         answer_dict = {
             "final_answer": answer_result.answer,
             "step_by_step_analysis": answer_result.reasoning,
@@ -600,10 +789,25 @@ class QuestionsProcessor:
         )
         answer_dict["final_answer"] = checked_answer
         answer_dict["finance_checks"] = finance_checks
-        
-        # 保存响应数据
-        self.response_data = {"model": "gpt-4o-2024-08-06", "input_tokens": 0, "output_tokens": 0}  # 简化处理
-        
+
+        if self.enable_abstention_gate:
+            abst = self._evaluate_abstention(retrieval_results, answer_dict)
+            if abst["apply"]:
+                answer_dict["final_answer"] = self._abstention_value_for_schema(schema)
+                answer_dict["step_by_step_analysis"] = abst["summary"]
+                answer_dict["reasoning_summary"] = abst["summary"]
+                answer_dict["relevant_pages"] = []
+                answer_dict["abstention"] = {"applied": True, "reasons": abst["reasons"]}
+            else:
+                answer_dict["abstention"] = {"applied": False}
+
+
+        self.response_data = {
+            "model": self.answer_generator.model,
+            "input_tokens": 0,
+            "output_tokens": 0,
+        }
+
         if self.new_challenge_pipeline:
             pages = answer_dict.get("relevant_pages", [])
             validated_pages = self._validate_page_references(pages, retrieval_results)
@@ -620,31 +824,26 @@ class QuestionsProcessor:
     def _extract_companies_from_subset(self, question_text: str) -> list[str]:
         """Extract company names from a question by matching against companies in the subset file."""
         if not hasattr(self, 'companies_df'):
-            #hasattr() 是 Python 内置的一个核心函数，专门用来检查一个对象是否拥有指定名称的属性或方法
+
             if self.subset_path is None:
                 raise ValueError("subset_path must be provided to use subset extraction")
             self.companies_df = pd.read_csv(self.subset_path)
-        
+
         found_companies = []
         company_names = sorted(self.companies_df['company_name'].unique(), key=len, reverse=True)
-        
+
         for company in company_names:
             escaped_company = re.escape(company)
-            #re.escape() 的作用:把公司名中的所有正则特殊字符转义成普通字符（在特殊字符前加 \），让正则把它们当成「普通文字」处理
-            
+
+
             pattern = rf'{escaped_company}(?:\W|$)'
-            '''
-            \W：匹配「非单词字符」(除字母，下划线，数字外)
-            $：匹配「字符串结尾」
-            非捕获组（?: 表示不单独捕获这个组）：只匹配，不捕获
-            '''
-            
-            if re.search(pattern, question_text, re.IGNORECASE):#忽略大小写，在问题文本中搜索该公司名
+
+            if re.search(pattern, question_text, re.IGNORECASE):
                 found_companies.append(company)
                 question_text = re.sub(pattern, '', question_text, flags=re.IGNORECASE)
-                #从问题文本中移除已匹配的公司名（避免重复匹配，比如问题里多次提「阿里巴巴」只算一次）
-                #代码里「按公司名长度降序遍历」的逻辑，从根源上避免了「短公司名匹配长公司名」的情况
-        
+
+
+
         return found_companies
 
     def process_question(
@@ -658,11 +857,11 @@ class QuestionsProcessor:
             extracted_companies = self._extract_companies_from_subset(question)
         else:
             extracted_companies = re.findall(r'"([^"]*)"', question)
-            #从问题里，把所有被 双引号 "" 包裹起来的内容 提取出来！
-        
+
+
         if len(extracted_companies) == 0:
             raise ValueError("No company name found in the question.")
-        
+
         if len(extracted_companies) == 1:
             company_name = extracted_companies[0]
             answer_dict = self.get_answer_for_company(
@@ -681,7 +880,7 @@ class QuestionsProcessor:
                 conversation_id=conversation_id,
                 conversation_history=conversation_history
             )
-    
+
     def _create_answer_detail_ref(self, answer_dict: dict, question_index: int) -> str:
         """Create a reference ID for answer details and store the details"""
         ref_id = f"#/answer_details/{question_index}"
@@ -698,7 +897,7 @@ class QuestionsProcessor:
             }
         return ref_id
 
-    def _calculate_statistics(self, processed_questions: List[dict], print_stats: bool = False) -> dict:#print_stats=False（默认）→ 不打印
+    def _calculate_statistics(self, processed_questions: List[dict], print_stats: bool = False) -> dict:
         """Calculate statistics about processed questions."""
         total_questions = len(processed_questions)
         error_count = sum(1 for q in processed_questions if "error" in q)
@@ -706,8 +905,8 @@ class QuestionsProcessor:
             1 for q in processed_questions
             if self._is_na_like(q.get("value") if "value" in q else q.get("answer"))
         )
-        #没有答案、无法回答、信息不足、找不到相关内容
-        #==“N/A”对应的是if和else两个条件
+
+
         success_count = total_questions - error_count - na_count
         if print_stats:
             print(f"\nFinal Processing Statistics:")
@@ -715,7 +914,7 @@ class QuestionsProcessor:
             print(f"Errors: {error_count} ({(error_count/total_questions)*100:.1f}%)")
             print(f"N/A answers: {na_count} ({(na_count/total_questions)*100:.1f}%)")
             print(f"Successfully answered: {success_count} ({(success_count/total_questions)*100:.1f}%)\n")
-        
+
         return {
             "total_questions": total_questions,
             "error_count": error_count,
@@ -724,13 +923,13 @@ class QuestionsProcessor:
         }
 
     def process_questions_list(self, questions_list: List[dict], output_path: str = None, submission_file: bool = False, team_email: str = "", submission_name: str = "", pipeline_details: str = "") -> dict:
-        #submission_file: bool = False：可选：是否生成提交格式
+
         total_questions = len(questions_list)
-        # Add index to each question so we know where to write the answer details
+
         questions_with_index = [{**q, "_question_index": i} for i, q in enumerate(questions_list)]
-        #**q：字典解包：把字典 q 里的所有键值对，全部展开、原封不动搬过去
-        #拼接一个新字典，加入index
-        self.answer_details = [None] * total_questions  # Preallocate list for answer details
+
+
+        self.answer_details = [None] * total_questions
         processed_questions = []
         parallel_threads = self.parallel_requests
 
@@ -745,27 +944,28 @@ class QuestionsProcessor:
                 for i in range(0, total_questions, parallel_threads):
                     batch = questions_with_index[i : i + parallel_threads]
                     with concurrent.futures.ThreadPoolExecutor(max_workers=parallel_threads) as executor:
-                        # executor.map will return results in the same order as the input list.
+
                         batch_results = list(executor.map(self._process_single_question, batch))
                     processed_questions.extend(batch_results)
-                    
+
                     if output_path:
                         self._save_progress(processed_questions, output_path, submission_file=submission_file, team_email=team_email, submission_name=submission_name, pipeline_details=pipeline_details)
                     pbar.update(len(batch_results))
-        
+
         statistics = self._calculate_statistics(processed_questions, print_stats = True)
-        
+
         return {
             "questions": processed_questions,
             "answer_details": self.answer_details,
-            "statistics": statistics
+            "statistics": statistics,
+            "route_usage": self.route_usage.to_dict(),
         }
 
     def _process_single_question(self, question_data: dict) -> dict:
         question_index = question_data.get("_question_index", 0)
         conversation_id = question_data.get("conversation_id")
         conversation_history = question_data.get("conversation_history") or question_data.get("history")
-        
+
         if self.new_challenge_pipeline:
             question_text = question_data.get("text")
             schema = question_data.get("kind")
@@ -779,7 +979,7 @@ class QuestionsProcessor:
                 conversation_id=conversation_id,
                 conversation_history=conversation_history
             )
-            
+
             if "error" in answer_dict:
                 detail_ref = self._create_answer_detail_ref({
                     "step_by_step_analysis": None,
@@ -810,7 +1010,8 @@ class QuestionsProcessor:
                     "kind": schema,
                     "value": answer_dict.get("final_answer"),
                     "references": answer_dict.get("references", []),
-                    "answer_details": {"$ref": detail_ref}
+                    "answer_details": {"$ref": detail_ref},
+                    "abstention": answer_dict.get("abstention"),
                 }
                 if conversation_id:
                     result["conversation_id"] = conversation_id
@@ -833,23 +1034,23 @@ class QuestionsProcessor:
         Handle errors during question processing.
         Log error details and return a dictionary containing error information.
         """
-        import traceback#Python 自带的打印详细报错堆栈工具
+        import traceback
         error_message = str(err)
-        tb = traceback.format_exc()#拿到完整的错误调用链
+        tb = traceback.format_exc()
         error_ref = f"#/answer_details/{question_index}"
         error_detail = {
             "error_traceback": tb,
             "self": error_ref
         }
-        
+
         with self._lock:
-            self.answer_details[question_index] = error_detail#把错误存到 answer_details
-        
+            self.answer_details[question_index] = error_detail
+
         print(f"Error encountered processing question: {question_text}")
         print(f"Error type: {type(err).__name__}")
         print(f"Error message: {error_message}")
         print(f"Full traceback:\n{tb}\n")
-        
+
         if self.new_challenge_pipeline:
             return {
                 "question_text": question_text,
@@ -877,29 +1078,29 @@ class QuestionsProcessor:
         4. Include step_by_step_analysis from answer details
         """
         submission_answers = []
-        
+
         for q in processed_questions:
             question_text = q.get("question_text") or q.get("question")
             kind = q.get("kind") or q.get("schema")
             value = "N/A" if "error" in q else (q.get("value") if "value" in q else q.get("answer"))
             references = q.get("references", [])
-            
-            answer_details_ref = q.get("answer_details", {}).get("$ref", "")#接着从上面拿到的值里，再取 "$ref" 这个 key
+
+            answer_details_ref = q.get("answer_details", {}).get("$ref", "")
             step_by_step_analysis = None
-            if answer_details_ref and answer_details_ref.startswith("#/answer_details/"):#必须是以 #/answer_details/ 开头
+            if answer_details_ref and answer_details_ref.startswith("#/answer_details/"):
                 try:
-                    index = int(answer_details_ref.split("/")[-1])#以’/‘进行分割，并去最后一个值，在这个场景中最后一个值应该是数字
+                    index = int(answer_details_ref.split("/")[-1])
                     if 0 <= index < len(self.answer_details) and self.answer_details[index]:
                         step_by_step_analysis = self.answer_details[index].get("step_by_step_analysis")
                 except (ValueError, IndexError):
                     pass
-            
-            # Clear references if value is N/A
+
+
             if self._is_na_like(value):
                 value = "N/A"
                 references = []
             else:
-                # Convert page indices from one-based to zero-based (competition requires 0-based page indices, but for debugging it is easier to use 1-based)
+
                 references = [
                     {
                         "pdf_sha1": ref["pdf_sha1"],
@@ -907,38 +1108,39 @@ class QuestionsProcessor:
                     }
                     for ref in references
                 ]
-            
+
             submission_answer = {
                 "question_text": question_text,
                 "kind": kind,
                 "value": value,
                 "references": references,
             }
-            
+
             if step_by_step_analysis:
                 submission_answer["reasoning_process"] = step_by_step_analysis
-            
+
             submission_answers.append(submission_answer)
-        
+
         return submission_answers
 
     def _save_progress(self, processed_questions: List[dict], output_path: Optional[str], submission_file: bool = False, team_email: str = "", submission_name: str = "", pipeline_details: str = ""):
         if output_path:
             statistics = self._calculate_statistics(processed_questions)
-            
-            # Prepare debug content
+
+
             result = {
                 "questions": processed_questions,
                 "answer_details": self.answer_details,
-                "statistics": statistics
+                "statistics": statistics,
+                "route_usage": self.route_usage.to_dict(),
             }
             output_file = Path(output_path)
             debug_file = output_file.with_name(output_file.stem + "_debug" + output_file.suffix)
             with open(debug_file, 'w', encoding='utf-8') as file:
                 json.dump(result, file, ensure_ascii=False, indent=2)
-            
+
             if submission_file:
-                # Post-process answers for submission
+
                 submission_answers = self._post_process_submission_answers(processed_questions)
                 submission = {
                     "answers": submission_answers,
@@ -974,16 +1176,18 @@ class QuestionsProcessor:
         2. Process each individual question using parallel threads
         3. Combine results into final comparative answer
         """
-        # Step 1: Rephrase the comparative question
+
         rephrased_questions = self.openai_processor.get_rephrased_questions(
             original_question=question,
-            companies=companies
+            companies=companies,
+            model=self._comparative_model_effective,
         )
-        
-        individual_answers = {}#创建空字典：用来存每个公司的单独答案
-        aggregated_references = []#创建空列表：用来汇总所有公司的引用页码
-        
-        # Step 2: Process each individual question in parallel
+        self.route_usage.record_comparative_rephrase()
+
+        individual_answers = {}
+        aggregated_references = []
+
+
         def process_company_question(company: str) -> tuple[str, dict]:
             """Helper function to process one company's question and return (company, answer)"""
             sub_question = rephrased_questions.get(company)
@@ -1020,17 +1224,17 @@ class QuestionsProcessor:
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
             future_to_company = {
-                executor.submit(process_company_question, company): company 
+                executor.submit(process_company_question, company): company
                 for company in companies
             }
-            
+
             for future in concurrent.futures.as_completed(future_to_company):
-                #future_to_company：表示的是{任务名：公司}
-                #as_completed(...)：完成一个任务就返回一个
+
+
                 try:
                     company, answer_dict = future.result()
                     individual_answers[company] = answer_dict
-                    
+
                     company_references = answer_dict.get("references", [])
                     aggregated_references.extend(company_references)
                 except Exception as e:
@@ -1043,33 +1247,33 @@ class QuestionsProcessor:
                         "references": [],
                         "relevant_pages": [],
                     }
-        
-        # Remove duplicate references
+
+
         unique_refs = {}
         for ref in aggregated_references:
             key = (ref.get("pdf_sha1"), ref.get("page_index"))
             unique_refs[key] = ref
         aggregated_references = list(unique_refs.values())
-        
-        # Step 3: Get the comparative answer using all individual answers
-        # 构建比较性问题的上下文
+
+
+
         comparative_context = []
         for company, answer in individual_answers.items():
             company_context = {
                 "text": f"Company: {company}\nAnswer: {answer.get('final_answer')}\nReasoning: {answer.get('step_by_step_analysis')}",
-                "page": 1  # 虚拟页码，实际不会使用
+                "page": 1
             }
             comparative_context.append(company_context)
-        
-        # 使用 AnswerGeneratorOptimized 生成比较性答案
+
+
         comparative_result = self.answer_generator.generate_answer(
             query=question,
             context=comparative_context,
             schema="comparative"
         )
 
-        # Use deterministic numeric ranking as the primary decision for name comparisons.
-        # This avoids model drift when one company is missing or cross-currency language appears.
+
+
         comparative_answer_value = comparative_result.answer
         if schema == "name":
             fallback_company = self._fallback_comparative_name_answer(question, individual_answers)
@@ -1085,8 +1289,8 @@ class QuestionsProcessor:
                         comparative_answer_value = valid_companies[0]
                     elif len(valid_companies) == 0:
                         comparative_answer_value = "N/A"
-        
-        # 构建比较性答案字典
+
+
         comparative_answer = {
             "final_answer": comparative_answer_value,
             "step_by_step_analysis": comparative_result.reasoning,
@@ -1097,10 +1301,13 @@ class QuestionsProcessor:
             "retrieval_query": question,
             "answer_similarity": None
         }
-        
-        # 保存响应数据
-        self.response_data = {"model": "gpt-4o-2024-08-06", "input_tokens": 0, "output_tokens": 0}  # 简化处理
-        
+
+        self.response_data = {
+            "model": self.answer_generator.model,
+            "input_tokens": 0,
+            "output_tokens": 0,
+        }
+
         comparative_answer["references"] = aggregated_references
         self._store_conversation_turn(
             conversation_id=conversation_id,
@@ -1108,4 +1315,3 @@ class QuestionsProcessor:
             answer=comparative_answer["final_answer"]
         )
         return comparative_answer
-    

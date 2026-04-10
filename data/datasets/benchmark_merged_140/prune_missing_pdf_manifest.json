@@ -1,0 +1,30 @@
+{
+  "removed_global_indices": [
+    2,
+    3,
+    8,
+    10,
+    12,
+    13,
+    14,
+    15,
+    16,
+    18,
+    26,
+    30,
+    31,
+    37,
+    38
+  ],
+  "removed_count": 15,
+  "remaining_count": 125,
+  "missing_pdf_shas": [
+    "1d3a4ffaa5c31d9d631632758d8c78444ff3a473",
+    "26a27255dec5a9a9759bd3089eb529579dffcfaf",
+    "6537bc95c5ef4ca30047df510815d1246d735617",
+    "a21c223eb7305d102023650d6d33cdc95e49dce9",
+    "c2acd6529e5fd16c74a24c4d6750cc3426da6007",
+    "fe3c1949e304f883acd5d829bf9e01654f99cabc"
+  ],
+  "subset_rows": 78
+}

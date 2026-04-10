@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-#自带数据校验、类型约束、默认值、文档说明：能够定位传参类型错误，位置以及应传类型
+
 from typing import Literal, List, Union
 import inspect
 import re
@@ -8,12 +8,12 @@ import re
 def build_system_prompt(instruction: str="", example: str="", pydantic_schema: str="") -> str:
     delimiter = "\n\n---\n\n"
     schema = f"Your answer should be in JSON and strictly follow this schema, filling in the fields in the order they are given:\n```\n{pydantic_schema}\n```"
-    #设定了固定的json结构，提示按照这个结构填写
+
     if example:
-        example = delimiter + example.strip()#去掉字符串 开头 和 结尾 的空白字符（空格、换行、制表符等），中间的不动
+        example = delimiter + example.strip()
     if schema:
         schema = delimiter + schema.strip()
-    
+
     system_prompt = instruction.strip() + schema + example
     return system_prompt
 
@@ -28,7 +28,7 @@ Each output question must be self-contained, maintain the same intent and metric
         """Individual question for a company"""
         company_name: str = Field(description="Company name, exactly as provided in quotes in the original question")
         question: str = Field(description="Rephrased question specific to this company")
-        #field（）用于给代码打标签以及设置默认值和规则等
+
 
     class RephrasedQuestions(BaseModel):
         """List of rephrased questions"""
@@ -59,7 +59,7 @@ Output:
             "question": "What was Apple's revenue in 2022?"
         },
         {
-            "company_name": "Microsoft", 
+            "company_name": "Microsoft",
             "question": "What was Microsoft's revenue in 2022?"
         }
     ]
@@ -71,7 +71,7 @@ Output:
     system_prompt = build_system_prompt(instruction, example)
 
     system_prompt_with_schema = build_system_prompt(instruction, example, pydantic_schema)
-#这一段之中，之所以pydantic类（class rephrasedquestion（））写一遍，然后在后面的schema再写一遍的原因是两者的作用不同，前者作为检验手段，后者作为对于llm的传参
+
 
 class AnswerWithRAGContextSharedPrompt:
     instruction = """
@@ -124,10 +124,10 @@ Without any extra information, words or comments.
 
     example = r"""
 Example:
-Question: 
-"Who was the CEO of 'Southwest Airlines Co.'?" 
+Question:
+"Who was the CEO of 'Southwest Airlines Co.'?"
 
-Answer: 
+Answer:
 ```
 {
   "step_by_step_analysis": "1. The question asks for the CEO of 'Southwest Airlines Co.'. The CEO is typically the highest-ranking executive responsible for the overall management of the company, sometimes referred to as the President or Managing Director.\n2. My source of information is a document that appears to be 'Southwest Airlines Co.''s annual report. This document will be used to identify the individual holding the CEO position.\n3. Within the provided document, there is a section that identifies Robert E. Jordan as the President & Chief Executive Officer of 'Southwest Airlines Co.'. The document confirms his role since February 2022.\n4. Therefore, based on the information found in the document, the CEO of 'Southwest Airlines Co.' is Robert E. Jordan.",
@@ -136,7 +136,7 @@ Answer:
   "final_answer": "Robert E. Jordan"
 }
 ```
-""" 
+"""
 
     system_prompt = build_system_prompt(instruction, example)
 
@@ -151,7 +151,7 @@ class AnswerWithRAGContextNumberPrompt:
     class AnswerSchema(BaseModel):
         step_by_step_analysis: str = Field(description="""
 Detailed step-by-step analysis of the answer with at least 5 steps and at least 150 words.
-**Strict Metric Matching Required:**    
+**Strict Metric Matching Required:**
 
 1. Determine the precise concept the question's metric represents. What is it actually measuring?
 2. Examine potential metrics in the context. Don't just compare names; consider what the context metric measures.
@@ -257,15 +257,18 @@ List of page numbers containing information directly used to answer the question
 Do not include pages with only tangentially related information or weak connections to the answer.
 At least one page should be included in the list.
 """)
-        
-        final_answer: Union[bool] = Field(description="""
-A boolean value (True or False) extracted from the context that precisely answers the question.
-If question ask about did something happen, and in context there is information about it, return False.
+
+        final_answer: bool = Field(description="""
+A boolean (True or False) that answers the question using only the provided context.
+
+- If the question is of the form "Did the company mention/report/disclose X?" or "Were there any X?": return True when the context contains a clear, substantive disclosure that satisfies X (including narrative text, MD&A, footnotes, or descriptions of transactions), even if there is no section titled exactly "X". Return False only when the context does not support X or explicitly states absence (as the question requires).
+- If the question is of the form "Did X happen?" in a narrow legalistic sense (e.g. a specific label or policy definition), apply that definition strictly: return True only when the context matches what the question actually asks, not a related idea.
+- Do not default to False when the context is ambiguous: re-read the question's exact object (e.g. "mergers or acquisitions" includes described acquisitions; "changes to capital structure" includes new debt/equity/convertible instruments if disclosed as such).
 """)
 
     pydantic_schema = re.sub(r"^ {4}", "", inspect.getsource(AnswerSchema), flags=re.MULTILINE)
-    #re.sub(...)→ 去掉每行前面的 4 个空格，让格式干净
-    #flags=re.MULTILINE：每一段都执行而不是执行一次，如上代码就是每一行的空格都去掉
+
+
 
 
     example = r"""
@@ -405,7 +408,7 @@ Answer:
 """
 
     system_prompt = build_system_prompt(instruction, example)
-    
+
     system_prompt_with_schema = build_system_prompt(instruction, example, pydantic_schema)
 
 
@@ -442,7 +445,7 @@ You will receive a query and retrieved text block related to that query. Your ta
 
 Instructions:
 
-1. Reasoning: 
+1. Reasoning:
    Analyze the block by identifying key information and how it relates to the query. Consider whether the block provides direct answers, partial insights, or background context relevant to the query. Explain your reasoning in a few sentences, referencing specific elements of the block to justify your evaluation. Avoid assumptions—focus solely on the content provided.
 
 2. Relevance Score (0 to 1, in increments of 0.1):
@@ -471,7 +474,7 @@ You will receive a query and several retrieved text blocks related to that query
 
 Instructions:
 
-1. Reasoning: 
+1. Reasoning:
    Analyze the block by identifying key information and how it relates to the query. Consider whether the block provides direct answers, partial insights, or background context relevant to the query. Explain your reasoning in a few sentences, referencing specific elements of the block to justify your evaluation. Avoid assumptions—focus solely on the content provided.
 
 2. Relevance Score (0 to 1, in increments of 0.1):

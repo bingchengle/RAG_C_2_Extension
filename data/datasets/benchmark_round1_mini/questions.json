@@ -1,0 +1,34 @@
+[
+  {
+    "text": "What was the Net Profit Margin of \"Oesterreichische Kontrollbank\" in June 30, 2023?",
+    "kind": "number"
+  },
+  {
+    "text": "What was the total liabilities of \"CrossFirst Bank\" in the fiscal year 2023?",
+    "kind": "number"
+  },
+  {
+    "text": "What was the earnings per share (EPS) of \"Holley Inc.\" in June 30, 2023?",
+    "kind": "number"
+  },
+  {
+    "text": "What was the accounts receivable of \"Petra Diamonds\" in the fiscal year 2023?",
+    "kind": "number"
+  },
+  {
+    "text": "How much more did \"Creative Media & Community Trust Corporation\" spend on sustainability initiatives compared to \"BAKER STEEL RESOURCES TRUST LIMITED\" in June 30, 2021?",
+    "kind": "number"
+  },
+  {
+    "text": "Which company had a higher total liabilities: \"Creative Media & Community Trust Corporation\", \"Sleep Country Canada Holdings Inc.\" or \"Tradition\", in the fiscal year 2023?",
+    "kind": "name"
+  },
+  {
+    "text": "What was the acquisition costs of \"Safe & Green Holdings Corp.\" in the fiscal year 2021?",
+    "kind": "number"
+  },
+  {
+    "text": "Which company had a higher shareholders' equity: \"MITSUI O.S.K. LINES\", \"TSX_Y\" or \"Tradition\", in the fiscal year 2022?",
+    "kind": "name"
+  }
+]

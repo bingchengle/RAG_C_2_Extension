@@ -1,0 +1,24 @@
+{
+  "total_questions": 125,
+  "note": "Pruned 15 questions that required any of 6 SHAs without local PDF; see prune_missing_pdf_manifest.json",
+  "subset_rows": 78,
+  "chunked_json_count": 80,
+  "out_dir": "C:\\Users\\yuyuy\\rag-argument\\data\\datasets\\benchmark_merged_140",
+  "pruned_removed_global_indices": [
+    2,
+    3,
+    8,
+    10,
+    12,
+    13,
+    14,
+    15,
+    16,
+    18,
+    26,
+    30,
+    31,
+    37,
+    38
+  ]
+}

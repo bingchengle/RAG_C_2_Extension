@@ -5,7 +5,7 @@ import json
 
 class PageTextPreparation:
     """
-    Cleans and formats page blocks according to rules, handling consecutive 
+    Cleans and formats page blocks according to rules, handling consecutive
     groups for tables, lists, and footnotes.
     """
 
@@ -15,35 +15,35 @@ class PageTextPreparation:
         self.serialized_tables_instead_of_markdown = serialized_tables_instead_of_markdown
 
     def process_reports(
-        self, 
-        reports_dir: Path = None, 
-        reports_paths: List[Path] = None, 
+        self,
+        reports_dir: Path = None,
+        reports_paths: List[Path] = None,
         output_dir: Path = None
     ):
         """
-        Process reports from a directory or list of paths, returning a list of processed reports 
+        Process reports from a directory or list of paths, returning a list of processed reports
         and saving them to an output directory if specified.
         """
         all_reports = []
-        
+
         if reports_dir:
             reports_paths = list(reports_dir.glob('*.json'))
-        
+
         for report_path in reports_paths:
             with open(report_path, 'r', encoding='utf-8') as file:
                 report_data = json.load(file)
-            
+
             full_report_text = self.process_report(report_data)
             report = {"metainfo": report_data['metainfo'], "content": full_report_text}
             all_reports.append(report)
-            
+
             if output_dir:
                 output_dir.mkdir(parents=True, exist_ok=True)
                 with open(output_dir / report_path.name, 'w', encoding='utf-8') as file:
                     json.dump(report, file, indent=2, ensure_ascii=False)
-        
+
         return all_reports
-        
+
     def process_report(self, report_data):
         """
         Process a single report, returning a list of processed pages and printing a message if corrections were made.
@@ -64,19 +64,19 @@ class PageTextPreparation:
                 "text": cleaned_text
             }
             processed_pages.append(page_data)
-        
+
         if total_corrections > 0:
             print(
                 f"Fixed {total_corrections} occurrences in the file "
                 f"{self.report_data['metainfo']['sha1_name']}"
             )
             print(corrections_list[:30])
-        
+
         processed_report = {
             "chunks": None,
             "pages": processed_pages
         }
-        
+
         return processed_report
 
     def prepare_page_text(self, page_number):
@@ -114,12 +114,12 @@ class PageTextPreparation:
                 continue
             filtered_blocks.append(block)
         return filtered_blocks
-    
+
     def _clean_text(self, text):
         """Clean text using regex substitutions and count corrections."""
         command_mapping = {
             'zero': '0',
-            'one': '1', 
+            'one': '1',
             'two': '2',
             'three': '3',
             'four': '4',
@@ -177,7 +177,7 @@ class PageTextPreparation:
         text = re.sub(r'/([A-Z])\.cap', replace_cap, text)
 
         return text, occurrences_amount, corrections
-    
+
     def _block_ends_with_colon(self, block):
         """Check if block text ends with colon for relevant block types."""
         block_type = block.get("type")
@@ -207,7 +207,7 @@ class PageTextPreparation:
             block_type = block.get("type")
             text = block.get("text", "").strip()
 
-            # Handle headers
+
             if block_type == "page_header":
                 prefix = "\n# " if i < 3 else "\n## "
                 final_blocks.append(f"{prefix}{text}\n")
@@ -240,7 +240,7 @@ class PageTextPreparation:
                     i += 1
                     continue
 
-            # Handle table groups
+
             if block_type == "table" or (
                 self._block_ends_with_colon(block)
                 and i + 1 < n
@@ -276,7 +276,7 @@ class PageTextPreparation:
                 final_blocks.append(group_text)
                 continue
 
-            # Handle list groups
+
             if block_type == "list_item" or (
                 self._block_ends_with_colon(block)
                 and i + 1 < n
@@ -305,7 +305,7 @@ class PageTextPreparation:
                 final_blocks.append(group_text)
                 continue
 
-            # Handle normal blocks
+
             if block_type in (
                 "text",
                 "caption",
@@ -388,19 +388,19 @@ class PageTextPreparation:
                     return self._get_serialized_table_text(t, self.serialized_tables_instead_of_markdown)
                 return t.get("markdown", "")
         raise ValueError(f"Table with ID={table_id} not found in report_data!")
-    
+
     def _get_serialized_table_text(self, table, serialized_tables_instead_of_markdown):
         """Convert serialized table format to text string.
-        
+
         Args:
             table: Table object containing serialized data
-            
+
         Returns:
             String containing concatenated information blocks or markdown as fallback
         """
         if not table.get("serialized"):
             return table.get("markdown", "")
-            
+
         info_blocks = table["serialized"].get("information_blocks", [])
         text_blocks = [block["information_block"] for block in info_blocks]
         serialized_text = "\n".join(text_blocks)
@@ -413,24 +413,24 @@ class PageTextPreparation:
 
     def export_to_markdown(self, reports_dir: Path, output_dir: Path):
         """Export processed reports to markdown files.
-        
+
         Args:
             reports_dir: Directory containing JSON report files
             output_dir: Directory where markdown files will be saved
         """
         output_dir.mkdir(parents=True, exist_ok=True)
-        
+
         for report_path in reports_dir.glob("*.json"):
             with open(report_path, 'r', encoding='utf-8') as f:
                 report_data = json.load(f)
-            
+
             processed_report = self.process_report(report_data)
-            
+
             document_text = ""
             for page in processed_report['pages']:
                 document_text += f"\n\n---\n\n# Page {page['page']}\n\n"
                 document_text += page['text']
-            
+
             report_name = report_data['metainfo']['sha1_name']
             with open(output_dir / f"{report_name}.md", "w", encoding="utf-8") as f:
                 f.write(document_text)
